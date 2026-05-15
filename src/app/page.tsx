@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   CheckCircle,
   Loader2,
-  Copy,
   Sparkles,
   Gamepad2,
   ArrowRight,
@@ -18,150 +17,183 @@ import {
   Zap,
   Users,
   Clock,
+  AlertTriangle,
+  Upload,
+  Link as LinkIcon,
+  Hash,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { RobloxFloatingElements, ProcessFlow } from "@/components/roblox-elements";
 
 interface Game {
-  id: number;
-  name: string;
-  slug: string;
-  category: string;
-  description: string | null;
-  requires_gamepass: boolean;
+  id: number; name: string; slug: string; category: string;
+  description: string | null; requires_gamepass: boolean;
 }
 
-interface RecentOrder {
-  nickname: string;
-  game: string;
-  nominal: number;
+// Price calculation: nominal * 1.3 rounded up
+function calculateGamePassPrice(nominal: number): number {
+  return Math.ceil(nominal * 1.3);
 }
 
 export default function CodeActivationPage() {
-  const [step, setStep] = useState<1 | 2>(1);
+  // Steps: 1=code, 2=nickname, 3=gamepass, 4=telegram+screenshot+confirm
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [code, setCode] = useState("");
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [games, setGames] = useState<Game[]>([]);
-  const [gameSearch, setGameSearch] = useState("");
-  const [loadingGames, setLoadingGames] = useState(false);
   const [nickname, setNickname] = useState("");
   const [telegram, setTelegram] = useState("");
-  const [gamepassUrl, setGamepassUrl] = useState("");
+  const [gamepassInput, setGamepassInput] = useState("");
+  const [gamepassMode, setGamepassMode] = useState<"url" | "id">("url");
+  const [gamepassChecked, setGamepassChecked] = useState(false);
+  const [gamepassValid, setGamepassValid] = useState(false);
+  const [gamepassInfo, setGamepassInfo] = useState<{ name: string; price: number | null; isForSale: boolean } | null>(null);
+  const [regionalPricingConfirmed, setRegionalPricingConfirmed] = useState(false);
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [screenshotUploading, setScreenshotUploading] = useState(false);
+  const [screenshotPath, setScreenshotPath] = useState<string | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activationResult, setActivationResult] = useState<any>(null);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [nominal, setNominal] = useState<number>(0);
+  const [gameInfo, setGameInfo] = useState<Game | null>(null);
 
+  // Keep for future multi-game support
+  const [games, setGames] = useState<Game[]>([]);
   useEffect(() => {
-    loadGames();
-    loadRecentOrders();
+    fetch("/api/games").then(r => r.json()).then(d => { if (d.ok) setGames(d.games); }).catch(() => {});
   }, []);
-
-  const loadGames = async (search = "") => {
-    setLoadingGames(true);
-    try {
-      const response = await fetch(`/api/games?search=${encodeURIComponent(search)}`);
-      const data = await response.json();
-      if (data.ok) setGames(data.games);
-    } catch (err) {
-      console.error("Error loading games:", err);
-    } finally {
-      setLoadingGames(false);
-    }
-  };
-
-  const loadRecentOrders = async () => {
-    try {
-      const response = await fetch("/api/status?recent=true");
-      const data = await response.json();
-      if (data.ok && data.orders) setRecentOrders(data.orders);
-    } catch { /* silent */ }
-  };
-
-  const handleGameSearch = (value: string) => {
-    setGameSearch(value);
-    loadGames(value);
-  };
-
-  // Keep these for future multi-game support
-  void selectedGame;
   void games;
-  void gameSearch;
-  void loadingGames;
-  void handleGameSearch;
+
+  const requiredPrice = calculateGamePassPrice(nominal);
 
   const validateCode = (code: string) => {
-    const NEW_CODE_REGEX = /^[A-Z0-9]{2,6}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{1}$/i;
-    return NEW_CODE_REGEX.test(code);
+    return /^[A-Z0-9]{2,6}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{1}$/i.test(code);
   };
 
+  // Step 1: Validate code
   const handleCodeSubmit = async () => {
     if (!code.trim()) { setError("Введите код активации"); return; }
     if (!validateCode(code)) { setError("Неверный формат кода. Формат: PREFIX-XXXX-XXXX-Y"); return; }
-    setError(null);
-    setLoading(true);
+    setError(null); setLoading(true);
     try {
-      const response = await fetch("/api/validate-code", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch("/api/validate-code", {
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: code.toUpperCase() }),
       });
-      const data = await response.json();
+      const data = await res.json();
       setLoading(false);
       if (!data.ok) { setError(data.error || "Ошибка проверки кода"); return; }
+      setNominal(data.nominal);
+      setGameInfo(data.game);
       setActivationResult(data);
       setStep(2);
-    } catch {
-      setLoading(false);
-      setError("Ошибка соединения с сервером");
-    }
+    } catch { setLoading(false); setError("Ошибка соединения с сервером"); }
+  };
+
+  // Step 2: Nickname -> next
+  const handleNicknameSubmit = () => {
+    if (!nickname.trim()) { setError("Введите ник в Roblox"); return; }
+    setError(null);
+    setStep(3);
+  };
+
+  // Step 3: Check GamePass
+  const extractGamePassId = useCallback((input: string): string | null => {
+    if (gamepassMode === "id") return input.trim() || null;
+    const match = input.match(/\/game-pass\/(\d+)/);
+    return match ? match[1] : null;
+  }, [gamepassMode]);
+
+  const checkGamePass = async () => {
+    const gpId = extractGamePassId(gamepassInput);
+    if (!gpId) { setError("Введите ссылку или ID GamePass"); return; }
+    setError(null); setLoading(true); setGamepassChecked(false); setGamepassValid(false);
+    try {
+      const res = await fetch(`/api/check-gamepass?id=${encodeURIComponent(gpId)}`);
+      const data = await res.json();
+      setLoading(false); setGamepassChecked(true);
+      if (!data.ok) {
+        setError(data.error);
+        setGamepassValid(false);
+        return;
+      }
+      setGamepassInfo(data.gamepass);
+      // Check price
+      if (data.gamepass.price !== null && data.gamepass.price === requiredPrice) {
+        setGamepassValid(true);
+      } else if (data.gamepass.price !== null && data.gamepass.price !== requiredPrice) {
+        setError(`Цена GamePass: ${data.gamepass.price} R$. Нужна: ${requiredPrice} R$. Измените цену и проверьте снова.`);
+        setGamepassValid(false);
+      } else {
+        // Price is null (not for sale?)
+        setGamepassValid(true); // Let them proceed but warn
+      }
+      if (!data.gamepass.isForSale) {
+        setError("GamePass не выставлен на продажу. Включите 'Item for Sale' в настройках.");
+        setGamepassValid(false);
+      }
+    } catch { setLoading(false); setError("Ошибка проверки GamePass"); }
+  };
+
+  const handleGamePassSubmit = () => {
+    if (!gamepassValid || !regionalPricingConfirmed) return;
+    setError(null);
+    setStep(4);
+  };
+
+  // Step 4: Upload screenshot and activate
+  const handleScreenshotUpload = async (file: File) => {
+    setScreenshotFile(file);
+    setScreenshotUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload-screenshot", { method: "POST", body: formData });
+      const data = await res.json();
+      setScreenshotUploading(false);
+      if (!data.ok) { setError(data.error); return; }
+      setScreenshotPath(data.path);
+    } catch { setScreenshotUploading(false); setError("Ошибка загрузки файла"); }
   };
 
   const handleActivation = async () => {
-    if (!agreedToTerms) { setError("Необходимо принять пользовательское соглашение"); return; }
-    setLoading(true);
-    setError(null);
+    if (!agreedToTerms) { setError("Примите пользовательское соглашение"); return; }
+    if (!screenshotPath) { setError("Загрузите скриншот покупки"); return; }
+    setLoading(true); setError(null);
+    const gpId = extractGamePassId(gamepassInput);
     try {
-      const response = await fetch("/api/activate-gamepass", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch("/api/activate-gamepass", {
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.toUpperCase(),
-          gamepassUrl: gamepassUrl.trim(),
+          gamepassUrl: gamepassMode === "url" ? gamepassInput.trim() : `https://www.roblox.com/game-pass/${gpId}`,
           nickname: nickname.trim(),
           telegram: telegram.trim(),
         }),
       });
-      const data = await response.json();
+      const data = await res.json();
       setLoading(false);
       if (!data.ok) { setError(data.error || "Ошибка активации"); return; }
       setActivationResult(data);
       setSuccess(data.message || "Код успешно активирован!");
-    } catch {
-      setLoading(false);
-      setError("Ошибка соединения с сервером");
-    }
+    } catch { setLoading(false); setError("Ошибка соединения с сервером"); }
   };
 
-  const copyToClipboard = (text: string) => { navigator.clipboard.writeText(text); };
-
   const resetForm = () => {
-    setCode(""); setSelectedGame(null); setGameSearch("");
-    setNickname(""); setTelegram(""); setGamepassUrl("");
-    setStep(1); setError(null); setSuccess(null);
-    setActivationResult(null); setAgreedToTerms(false);
+    setCode(""); setNickname(""); setTelegram(""); setGamepassInput("");
+    setGamepassMode("url"); setGamepassChecked(false); setGamepassValid(false);
+    setGamepassInfo(null); setRegionalPricingConfirmed(false);
+    setScreenshotFile(null); setScreenshotPath(null); setAgreedToTerms(false);
+    setStep(1); setError(null); setSuccess(null); setActivationResult(null);
+    setNominal(0); setGameInfo(null);
   };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden noise grid-pattern">
-      {/* Roblox floating elements */}
       <RobloxFloatingElements />
-
-      {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#00b06a]/5 rounded-full blur-[150px]" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#00b06a]/3 rounded-full blur-[150px]" />
@@ -170,80 +202,39 @@ export default function CodeActivationPage() {
       <Navigation currentPage="activation" />
 
       <div className="relative z-10">
-        {/* Hero Section - AuthKit style */}
-        <section className="container mx-auto px-4 pt-16 md:pt-24 pb-12">
+        {/* Hero */}
+        <section className="container mx-auto px-4 pt-16 md:pt-20 pb-8">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Badge */}
             <div className="animate-fade-in-up">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00b06a]/10 border border-[#00b06a]/20 mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#00b06a]/10 border border-[#00b06a]/20 mb-6">
                 <div className="w-2 h-2 bg-[#00b06a] rounded-full animate-pulse" />
-                <span className="text-xs font-medium text-[#00b06a]">Сервис активен • 500+ активаций</span>
+                <span className="text-xs font-medium text-[#00b06a]">Сервис активен</span>
               </div>
             </div>
-
-            {/* Main heading */}
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in-up delay-100 leading-[1.1] tracking-tight" style={{ opacity: 0 }}>
-              <span className="text-foreground">Активируй свой</span>
-              <br />
-              <span className="gradient-text-hero animate-text-glow">код на Robux</span>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in-up delay-100 leading-[1.1]" style={{ opacity: 0 }}>
+              <span className="text-foreground">Активируй </span>
+              <span className="gradient-text-hero">код на Robux</span>
             </h1>
-
-            {/* Subtitle */}
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in-up delay-200 leading-relaxed" style={{ opacity: 0 }}>
-              Введи код, создай GamePass, получи Robux на свой аккаунт.
-              <br className="hidden md:block" />
-              Быстро, безопасно, с гарантией.
+            <p className="text-lg text-muted-foreground mb-8 animate-fade-in-up delay-200" style={{ opacity: 0 }}>
+              Быстро, безопасно, с гарантией
             </p>
-
-            {/* CTA Scroll */}
-            <div className="animate-fade-in-up delay-300" style={{ opacity: 0 }}>
-              <button
-                onClick={() => document.getElementById("activation-form")?.scrollIntoView({ behavior: "smooth" })}
-                className="btn-roblox px-8 py-4 text-base inline-flex items-center gap-2"
-              >
-                Активировать код
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
           </div>
         </section>
 
-        {/* Features - AuthKit style cards */}
+        {/* Features */}
         <section className="container mx-auto px-4 pb-8">
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FeatureCard
-              icon={<Zap className="w-5 h-5" />}
-              title="Мгновенно"
-              description="Проверка кода за 1-2 секунды"
-              delay="delay-200"
-            />
-            <FeatureCard
-              icon={<Shield className="w-5 h-5" />}
-              title="Безопасно"
-              description="Защищённые транзакции"
-              delay="delay-300"
-            />
-            <FeatureCard
-              icon={<Clock className="w-5 h-5" />}
-              title="5-7 дней"
-              description="Зачисление Robux"
-              delay="delay-400"
-            />
+            <FeatureCard icon={<Zap className="w-5 h-5" />} title="Мгновенно" description="Проверка за 1-2 сек" delay="delay-200" />
+            <FeatureCard icon={<Shield className="w-5 h-5" />} title="Безопасно" description="Защищённые транзакции" delay="delay-300" />
+            <FeatureCard icon={<Clock className="w-5 h-5" />} title="5-7 дней" description="Зачисление Robux" delay="delay-400" />
           </div>
         </section>
 
-        {/* Process Flow Diagram - Simple 3 steps */}
-        <section className="container mx-auto px-4 pb-20">
-          <div className="max-w-4xl mx-auto text-center mb-10">
-            <p className="text-xs font-medium text-[#00b06a] uppercase tracking-wider mb-3 animate-fade-in-up delay-300" style={{ opacity: 0 }}>
-              Всего 3 шага
-            </p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-3 animate-fade-in-up delay-400" style={{ opacity: 0 }}>
-              Как получить Robux?
-            </h2>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto animate-fade-in-up delay-500" style={{ opacity: 0 }}>
-              Всё просто — введи код, создай GamePass и жди зачисления
-            </p>
+        {/* How it works */}
+        <section className="container mx-auto px-4 pb-12">
+          <div className="max-w-4xl mx-auto text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2 animate-fade-in-up delay-300" style={{ opacity: 0 }}>Как получить Robux?</h2>
+            <p className="text-sm text-muted-foreground animate-fade-in-up delay-400" style={{ opacity: 0 }}>Всего 3 шага</p>
           </div>
           <ProcessFlow />
         </section>
@@ -251,295 +242,321 @@ export default function CodeActivationPage() {
         {/* Activation Form */}
         <section id="activation-form" className="container mx-auto px-4 pb-16">
           <div className="max-w-lg mx-auto">
-            {/* Step indicators */}
-            <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in-up delay-300" style={{ opacity: 0 }}>
-              <StepDot number={1} active={step === 1} completed={step > 1} />
-              <div className={`w-16 h-[2px] rounded-full transition-all duration-500 ${step > 1 ? "bg-[#00b06a]" : "bg-border"}`} />
-              <StepDot number={2} active={step === 2} completed={!!success} />
+            {/* Step progress */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              {[1, 2, 3, 4].map((s) => (
+                <div key={s} className="flex items-center gap-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    s < step ? "bg-[#00b06a] text-white" :
+                    s === step ? "bg-[#00b06a]/20 text-[#00b06a] border border-[#00b06a]/40 animate-glow-pulse" :
+                    "bg-white/5 text-muted-foreground border border-white/10"
+                  }`}>
+                    {s < step ? <CheckCircle className="w-4 h-4" /> : s}
+                  </div>
+                  {s < 4 && <div className={`w-6 h-[2px] rounded ${s < step ? "bg-[#00b06a]" : "bg-white/10"}`} />}
+                </div>
+              ))}
             </div>
 
-            {/* Step 1 */}
+            {/* STEP 1: Code */}
             {step === 1 && !success && (
-              <Card className="glass-card border-white/8 shadow-2xl shadow-black/20 animate-scale-in">
+              <Card className="glass-card border-white/8 shadow-2xl animate-scale-in">
                 <CardHeader className="text-center pb-2">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-[#00b06a]/10 border border-[#00b06a]/20 flex items-center justify-center">
                     <Gamepad2 className="w-6 h-6 text-[#00b06a]" />
                   </div>
                   <CardTitle className="text-xl">Введите код активации</CardTitle>
-                  <CardDescription>Код из вашей покупки для получения Robux</CardDescription>
+                  <CardDescription>Код из вашей покупки</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5 pt-2">
-                  <div className="space-y-3">
-                    <Input
-                      id="code"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value.toUpperCase())}
-                      placeholder="RBX-ABCD-EFGH-5"
-                      className="font-mono text-center text-lg h-14 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 focus:ring-[#00b06a]/20 tracking-[0.2em] rounded-xl"
-                      disabled={loading}
-                    />
-                    <p className="text-center text-xs text-muted-foreground">
-                      Формат: <span className="font-mono text-foreground/70">PREFIX-XXXX-XXXX-Y</span>
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleCodeSubmit}
-                    disabled={!code.trim() || loading}
-                    className="w-full h-12 text-base font-semibold btn-roblox rounded-xl"
-                    size="lg"
-                  >
-                    {loading ? (
-                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Проверка...</>
-                    ) : (
-                      <>Проверить код<ArrowRight className="w-5 h-5 ml-2" /></>
-                    )}
+                  <Input
+                    value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    placeholder="RBX-ABCD-EFGH-5"
+                    className="font-mono text-center text-lg h-14 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 tracking-[0.15em] rounded-xl"
+                    disabled={loading}
+                    onKeyDown={(e) => e.key === "Enter" && handleCodeSubmit()}
+                  />
+                  <p className="text-center text-xs text-muted-foreground">
+                    Формат: <span className="font-mono text-foreground/70">PREFIX-XXXX-XXXX-Y</span>
+                  </p>
+                  <Button onClick={handleCodeSubmit} disabled={!code.trim() || loading} className="w-full h-12 text-base font-semibold btn-roblox rounded-xl" size="lg">
+                    {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Проверка...</> : <>Проверить код<ArrowRight className="w-5 h-5 ml-2" /></>}
                   </Button>
                 </CardContent>
               </Card>
             )}
 
-            {/* Step 2 */}
-            {step === 2 && activationResult && !success && (
-              <Card className="glass-card border-white/8 shadow-2xl shadow-black/20 animate-scale-in">
-                <CardHeader className="text-center pb-2">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-2xl bg-[#00b06a]/10 border border-[#00b06a]/20 flex items-center justify-center">
-                    <CheckCircle className="w-6 h-6 text-[#00b06a]" />
-                  </div>
-                  <CardTitle className="text-xl">Подтверждение</CardTitle>
-                  <CardDescription>Код проверен — заполните данные для активации</CardDescription>
+            {/* STEP 2: Nickname */}
+            {step === 2 && !success && (
+              <Card className="glass-card border-white/8 shadow-2xl animate-scale-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-[#00b06a]" />
+                    Шаг 1 из 3: ваш ник в Roblox
+                  </CardTitle>
+                  <CardDescription>Код проверен, теперь укажите ваш никнейм</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-5 pt-2">
-                  {/* Code info badge */}
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-[#00b06a]/5 border border-[#00b06a]/15">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#00b06a]/10 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-[#00b06a]" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{code}</p>
-                        <p className="text-xs text-muted-foreground">Roblox</p>
-                      </div>
-                    </div>
-                    <Badge className="bg-[#00b06a]/20 text-[#00b06a] border-[#00b06a]/30 text-base px-3 py-1">
-                      {activationResult.nominal} R$
-                    </Badge>
+                  {/* Code info */}
+                  <div className="rounded-xl p-4 bg-[#00b06a]/5 border border-[#00b06a]/15 space-y-2">
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Код:</span><span className="font-mono font-bold">{code}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Номинал:</span><Badge className="bg-[#00b06a] text-white">{nominal}</Badge></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Тип:</span><Badge variant="outline">Roblox</Badge></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Статус:</span><Badge className="bg-[#00b06a]/20 text-[#00b06a] border-[#00b06a]/30"><CheckCircle className="w-3 h-3 mr-1" />Готов к активации</Badge></div>
                   </div>
 
-                  {/* Fields */}
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="nickname" className="text-sm">Ник в Roblox</Label>
-                      <Input
-                        id="nickname"
-                        placeholder="Ваш никнейм"
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
-                        disabled={loading}
-                        className="h-11 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="telegram" className="text-sm">Telegram</Label>
-                      <Input
-                        id="telegram"
-                        placeholder="@username"
-                        value={telegram}
-                        onChange={(e) => setTelegram(e.target.value)}
-                        disabled={loading}
-                        className="h-11 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
-                      />
-                    </div>
-                    {activationResult.game?.requires_gamepass && (
-                      <div className="space-y-2">
-                        <Label htmlFor="gamepass" className="text-sm">Ссылка на GamePass</Label>
-                        <Input
-                          id="gamepass"
-                          placeholder="https://www.roblox.com/game-pass/..."
-                          value={gamepassUrl}
-                          onChange={(e) => setGamepassUrl(e.target.value)}
-                          disabled={loading}
-                          className="h-11 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
-                        />
-                      </div>
+                  {/* Warning */}
+                  <Alert className="border-yellow-500/20 bg-yellow-500/5 rounded-xl">
+                    <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                    <AlertDescription className="text-sm text-yellow-200/80">
+                      <strong>Robux ещё НЕ начислены.</strong> Сначала создайте GamePass и заполните данные.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm">Ник в Roblox</Label>
+                    <Input
+                      value={nickname} onChange={(e) => setNickname(e.target.value)}
+                      placeholder="Например, SuperPlayer123"
+                      className="h-12 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
+                      onKeyDown={(e) => e.key === "Enter" && handleNicknameSubmit()}
+                    />
+                  </div>
+
+                  <Button onClick={handleNicknameSubmit} disabled={!nickname.trim()} className="w-full h-12 btn-roblox rounded-xl font-semibold">
+                    Далее <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                  <button onClick={() => setStep(1)} className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2">← Назад к вводу кода</button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* STEP 3: GamePass */}
+            {step === 3 && !success && (
+              <Card className="glass-card border-white/8 shadow-2xl animate-scale-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Шаг 2 из 3: GamePass</CardTitle>
+                  <CardDescription>Создайте GamePass и вставьте ссылку или ID</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5 pt-2">
+                  {/* Instructions box */}
+                  <div className="rounded-xl p-4 bg-[#00b06a]/5 border border-[#00b06a]/15 space-y-2">
+                    <p className="text-sm font-semibold text-[#00b06a]">Создайте GamePass:</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>откройте <a href="https://create.roblox.com/" target="_blank" className="text-[#00b06a] hover:underline">Creator Dashboard</a></li>
+                      <li>создайте GamePass</li>
+                      <li>установите цену <strong className="text-foreground">{requiredPrice} R$</strong> для этого кода</li>
+                      <li>отключите Regional Pricing</li>
+                      <li>если Roblox просит верификацию — пройдите опрос View questionnaire</li>
+                    </ul>
+                  </div>
+
+                  {/* Nickname display */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/8">
+                    <span className="text-sm text-muted-foreground">Ник в Roblox: <strong className="text-foreground">{nickname}</strong></span>
+                    <button onClick={() => setStep(2)} className="text-xs text-[#00b06a] hover:underline">Изменить</button>
+                  </div>
+
+                  {/* Mode toggle */}
+                  <div className="flex gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/8">
+                    <button onClick={() => { setGamepassMode("url"); setGamepassChecked(false); setGamepassValid(false); setError(null); }}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${gamepassMode === "url" ? "bg-[#00b06a]/10 text-[#00b06a] border border-[#00b06a]/20" : "text-muted-foreground"}`}>
+                      <LinkIcon className="w-3.5 h-3.5" />По ссылке
+                    </button>
+                    <button onClick={() => { setGamepassMode("id"); setGamepassChecked(false); setGamepassValid(false); setError(null); }}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${gamepassMode === "id" ? "bg-[#00b06a]/10 text-[#00b06a] border border-[#00b06a]/20" : "text-muted-foreground"}`}>
+                      <Hash className="w-3.5 h-3.5" />По GamePass ID
+                    </button>
+                  </div>
+
+                  {/* Input */}
+                  <div className="space-y-2">
+                    <Input
+                      value={gamepassInput} onChange={(e) => { setGamepassInput(e.target.value); setGamepassChecked(false); setGamepassValid(false); }}
+                      placeholder={gamepassMode === "url" ? "https://www.roblox.com/game-pass/1234567/Name" : "1234567"}
+                      className="h-11 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl font-mono text-sm"
+                    />
+                    {gamepassMode === "id" && (
+                      <p className="text-xs text-muted-foreground">Откройте GamePass в Roblox и скопируйте цифры после /game-pass/</p>
                     )}
+                  </div>
+
+                  {/* Check button */}
+                  <Button onClick={checkGamePass} disabled={!gamepassInput.trim() || loading} variant="outline" className="w-full h-10 rounded-xl border-white/10 hover:bg-white/5">
+                    {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                    Проверить GamePass
+                  </Button>
+
+                  {/* GamePass check result */}
+                  {gamepassChecked && gamepassValid && gamepassInfo && (
+                    <div className="rounded-xl p-3 bg-[#00b06a]/5 border border-[#00b06a]/20 animate-fade-in">
+                      <div className="flex items-center gap-2 text-sm text-[#00b06a]">
+                        <CheckCircle className="w-4 h-4" />
+                        <span className="font-medium">GamePass найден: {gamepassInfo.name}</span>
+                      </div>
+                      {gamepassInfo.price !== null && (
+                        <p className="text-xs text-muted-foreground mt-1">Цена: {gamepassInfo.price} R$ ✓</p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Regional Pricing warning */}
+                  {gamepassValid && (
+                    <div className="rounded-xl p-4 bg-yellow-500/5 border border-yellow-500/15 space-y-3 animate-fade-in">
+                      <p className="text-sm font-medium text-yellow-400">⚠️ Проверьте Regional Pricing</p>
+                      <p className="text-xs text-muted-foreground">В таблице Passes смотрите колонку <strong>Regional Pricing</strong> — должно быть <Badge variant="outline" className="text-xs">Disabled</Badge>. Если нет — выключите и проверьте снова.</p>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input type="checkbox" checked={regionalPricingConfirmed} onChange={(e) => setRegionalPricingConfirmed(e.target.checked)}
+                          className="mt-0.5 w-5 h-5 rounded accent-[#00b06a]" />
+                        <span className="text-sm text-muted-foreground">
+                          Подтверждаю: в GamePass цена <strong className="text-foreground">{requiredPrice} R$</strong>, а Regional Pricing выключен
+                        </span>
+                      </label>
+                    </div>
+                  )}
+
+                  <Separator className="bg-white/5" />
+
+                  <Button onClick={handleGamePassSubmit} disabled={!gamepassValid || !regionalPricingConfirmed} className="w-full h-12 btn-roblox rounded-xl font-semibold">
+                    Перейти к шагу 3 — отправка данных <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                  <button onClick={() => setStep(2)} className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2">← Назад</button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* STEP 4: Telegram + Screenshot + Confirm */}
+            {step === 4 && !success && (
+              <Card className="glass-card border-white/8 shadow-2xl animate-scale-in">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Шаг 3 из 3: подтверждение</CardTitle>
+                  <CardDescription>Telegram, скриншот покупки и активация</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5 pt-2">
+                  {/* Nickname display */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/8">
+                    <span className="text-sm text-muted-foreground">Ник: <strong className="text-foreground">{nickname}</strong></span>
+                    <button onClick={() => setStep(2)} className="text-xs text-[#00b06a] hover:underline">Изменить</button>
+                  </div>
+
+                  {/* Telegram */}
+                  <div className="space-y-2">
+                    <Label className="text-sm">Telegram для обратной связи</Label>
+                    <Input
+                      value={telegram} onChange={(e) => setTelegram(e.target.value)}
+                      placeholder="@username или номер телефона"
+                      className="h-11 bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
+                    />
+                  </div>
+
+                  {/* Screenshot upload */}
+                  <div className="space-y-3">
+                    <Label className="text-sm">
+                      Скриншот покупки <span className="text-[#00b06a]">(обязательное поле)</span>
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Загрузите скриншот, где видно, что товар доставлен (дата и статус «доставлено»). Без скрина заказ не принимается в работу.
+                    </p>
+                    <div className="relative">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScreenshotUpload(f); }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        disabled={screenshotUploading}
+                      />
+                      <div className={`flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed transition-all ${
+                        screenshotPath ? "border-[#00b06a]/30 bg-[#00b06a]/5" : "border-white/10 hover:border-white/20 bg-white/[0.02]"
+                      }`}>
+                        {screenshotUploading ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">Загрузка...</span></>
+                        ) : screenshotPath ? (
+                          <><CheckCircle className="w-4 h-4 text-[#00b06a]" /><span className="text-sm text-[#00b06a]">{screenshotFile?.name}</span></>
+                        ) : (
+                          <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Загрузить скриншот</span></>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Формат: JPG, PNG или WEBP, максимум 5 МБ</p>
+                  </div>
+
+                  {/* Info box */}
+                  <div className="rounded-xl p-3 bg-white/[0.02] border border-white/8 text-xs text-muted-foreground">
+                    После активации проверка может занять до 5 минут. Статус заказа можно проверить по нику на <a href="/status" className="text-[#00b06a] hover:underline">странице проверки</a>.
                   </div>
 
                   <Separator className="bg-white/5" />
 
                   {/* Terms */}
                   <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <input
-                      type="checkbox"
-                      id="terms"
-                      checked={agreedToTerms}
-                      onChange={(e) => setAgreedToTerms(e.target.checked)}
-                      className="mt-0.5 w-5 h-5 rounded accent-[#00b06a] bg-[#1a1a28] border-white/20"
-                      disabled={loading}
-                    />
+                    <input type="checkbox" id="terms" checked={agreedToTerms} onChange={(e) => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded accent-[#00b06a]" disabled={loading} />
                     <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
                       Отправляя данные, я даю{" "}
-                      <a href="/terms" target="_blank" className="text-[#00b06a] hover:underline">
-                        Согласие на обработку персональных данных
-                      </a>{" "}
+                      <a href="/terms" target="_blank" className="text-[#00b06a] hover:underline">Согласие на обработку персональных данных</a>{" "}
                       и принимаю положения{" "}
-                      <a href="/privacy" target="_blank" className="text-[#00b06a] hover:underline">
-                        Политики обработки персональных данных
-                      </a>
+                      <a href="/privacy" target="_blank" className="text-[#00b06a] hover:underline">Политики обработки персональных данных</a>
                     </label>
                   </div>
 
-                  {/* Buttons */}
-                  <Button
-                    onClick={handleActivation}
-                    disabled={loading || !nickname.trim() || !telegram.trim() || !agreedToTerms || (activationResult.game?.requires_gamepass && !gamepassUrl.trim())}
-                    className="w-full h-12 text-base font-semibold btn-roblox rounded-xl"
-                    size="lg"
-                  >
-                    {loading ? (
-                      <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Активация...</>
-                    ) : (
-                      <><Sparkles className="w-5 h-5 mr-2" />Активировать</>
-                    )}
+                  <Button onClick={handleActivation}
+                    disabled={loading || !telegram.trim() || !screenshotPath || !agreedToTerms}
+                    className="w-full h-12 btn-roblox rounded-xl font-semibold text-base">
+                    {loading ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Активация...</> : <><Sparkles className="w-5 h-5 mr-2" />Активировать код</>}
                   </Button>
-
-                  <button
-                    onClick={() => setStep(1)}
-                    className="w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
-                    disabled={loading}
-                  >
-                    ← Назад
-                  </button>
+                  <button onClick={() => setStep(3)} className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2">← Назад</button>
                 </CardContent>
               </Card>
             )}
 
-            {/* Success */}
+            {/* SUCCESS */}
             {success && activationResult && (
               <Card className="glass-card border-[#00b06a]/20 shadow-2xl shadow-[#00b06a]/5 animate-scale-in">
                 <CardContent className="p-8 text-center space-y-6">
-                  <div className="relative w-20 h-20 mx-auto">
-                    <div className="absolute inset-0 rounded-full bg-[#00b06a]/20 animate-pulse" />
-                    <div className="relative w-full h-full rounded-full bg-[#00b06a]/10 border border-[#00b06a]/30 flex items-center justify-center animate-glow-pulse">
-                      <CheckCircle className="w-10 h-10 text-[#00b06a]" />
-                    </div>
+                  <div className="w-20 h-20 mx-auto rounded-full bg-[#00b06a]/10 border border-[#00b06a]/30 flex items-center justify-center animate-glow-pulse">
+                    <CheckCircle className="w-10 h-10 text-[#00b06a]" />
                   </div>
-
                   <div>
                     <h2 className="text-2xl font-bold text-[#00b06a] mb-2">Успешно!</h2>
                     <p className="text-muted-foreground">{success}</p>
                   </div>
-
-                  <div className="rounded-xl p-5 bg-white/[0.03] border border-white/8 space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="text-left">
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Код</span>
-                        <p className="font-mono font-bold mt-1">{code}</p>
-                      </div>
-                      <div className="text-left">
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Номинал</span>
-                        <p className="font-bold text-[#00b06a] mt-1">{activationResult.nominal} Robux</p>
-                      </div>
-                    </div>
+                  <div className="rounded-xl p-4 bg-white/[0.03] border border-white/8 text-sm text-left space-y-2">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Код:</span><span className="font-mono font-bold">{code}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Номинал:</span><span className="text-[#00b06a] font-bold">{nominal} Robux</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Ник:</span><span>{nickname}</span></div>
                   </div>
-
-                  <div className="flex gap-3">
-                    <Button onClick={resetForm} className="flex-1 h-11 btn-roblox rounded-xl">
-                      Активировать ещё
-                    </Button>
-                    <Button
-                      onClick={() => copyToClipboard(code)}
-                      variant="outline"
-                      className="h-11 px-4 border-white/10 hover:bg-white/5 rounded-xl"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <p className="text-xs text-muted-foreground">Проверяйте статус на <a href="/status" className="text-[#00b06a] hover:underline">странице статуса</a></p>
+                  <Button onClick={resetForm} className="w-full h-11 btn-roblox rounded-xl">Активировать ещё</Button>
                 </CardContent>
               </Card>
             )}
 
             {/* Error */}
             {error && (
-              <Alert variant="destructive" className="mt-6 animate-fade-in border-red-500/20 bg-red-500/5 rounded-xl">
-                <AlertDescription className="flex items-center justify-between">
-                  <span className="text-sm">{error}</span>
-                  <button onClick={() => setError(null)} className="text-xs text-red-300 hover:text-red-200 ml-3">
-                    ✕
-                  </button>
-                </AlertDescription>
+              <Alert variant="destructive" className="mt-4 border-red-500/20 bg-red-500/5 rounded-xl animate-fade-in">
+                <AlertTriangle className="w-4 h-4" />
+                <AlertDescription className="text-sm">{error}</AlertDescription>
               </Alert>
             )}
           </div>
         </section>
 
-        {/* Recent Orders */}
-        {recentOrders.length > 0 && (
-          <section className="container mx-auto px-4 pb-16">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-6">
-                <p className="text-sm text-muted-foreground">Последние активации</p>
-              </div>
-              <div className="overflow-hidden rounded-2xl glass-card border-white/5 p-5">
-                <div className="flex gap-4 animate-ticker">
-                  {[...recentOrders, ...recentOrders].map((order, i) => (
-                    <div key={i} className="flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5">
-                      <div className="w-8 h-8 rounded-lg bg-[#00b06a]/10 flex items-center justify-center">
-                        <Users className="w-4 h-4 text-[#00b06a]" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium">{order.nickname}</p>
-                        <p className="text-xs text-muted-foreground">{order.nominal} R$</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Community Section */}
+        {/* Community */}
         <section className="container mx-auto px-4 pb-16">
           <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-3 animate-fade-in-up" style={{ opacity: 0 }}>
-              Наше сообщество
-            </h2>
-            <p className="text-muted-foreground mb-8 animate-fade-in-up delay-100" style={{ opacity: 0 }}>
-              Розыгрыши, новости и поддержка
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-200" style={{ opacity: 0 }}>
-              <a
-                href="https://t.me/rbxpass_loothub"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-hover rounded-2xl px-6 py-4 flex items-center gap-4"
-              >
+            <h2 className="text-xl font-bold mb-6">Наше сообщество</h2>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a href="https://t.me/rbxpass_loothub" target="_blank" rel="noopener noreferrer" className="glass-card-hover rounded-2xl px-6 py-4 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-[#2AABEE]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#2AABEE]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                  </svg>
+                  <Users className="w-5 h-5 text-[#2AABEE]" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium">Telegram</p>
-                  <p className="text-xs text-muted-foreground">@rbxpass_loothub</p>
-                </div>
+                <div className="text-left"><p className="text-sm font-medium">Telegram</p><p className="text-xs text-muted-foreground">@rbxpass_loothub</p></div>
               </a>
-              <a
-                href="https://vk.com/rbxpass_loothub"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-hover rounded-2xl px-6 py-4 flex items-center gap-4"
-              >
+              <a href="https://vk.com/rbxpass_loothub" target="_blank" rel="noopener noreferrer" className="glass-card-hover rounded-2xl px-6 py-4 flex items-center gap-4">
                 <div className="w-10 h-10 rounded-xl bg-[#4C75A3]/10 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#4C75A3]" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.391 0 15.684 0zm3.692 17.123h-1.744c-.66 0-.864-.525-2.05-1.727-1.033-1-1.49-1.135-1.744-1.135-.356 0-.458.102-.458.593v1.575c0 .424-.135.678-1.253.678-1.846 0-3.896-1.12-5.339-3.202-2.17-3.042-2.763-5.32-2.763-5.778 0-.254.102-.491.593-.491h1.744c.44 0 .61.203.78.678.864 2.49 2.303 4.675 2.896 4.675.22 0 .322-.102.322-.66V9.721c-.068-1.186-.695-1.287-.695-1.71 0-.204.17-.407.44-.407h2.744c.373 0 .508.203.508.643v3.473c0 .372.17.508.271.508.22 0 .407-.136.813-.542 1.27-1.422 2.17-3.608 2.17-3.608.119-.254.322-.491.763-.491h1.744c.525 0 .644.27.525.643-.22 1.017-2.354 4.031-2.354 4.031-.186.305-.254.44 0 .78.186.254.796.779 1.203 1.253.745.847 1.32 1.558 1.473 2.05.17.49-.085.744-.576.744z"/>
-                  </svg>
+                  <Users className="w-5 h-5 text-[#4C75A3]" />
                 </div>
-                <div className="text-left">
-                  <p className="text-sm font-medium">VKontakte</p>
-                  <p className="text-xs text-muted-foreground">rbxpass_loothub</p>
-                </div>
+                <div className="text-left"><p className="text-sm font-medium">VKontakte</p><p className="text-xs text-muted-foreground">rbxpass_loothub</p></div>
               </a>
             </div>
           </div>
@@ -553,28 +570,10 @@ export default function CodeActivationPage() {
 
 function FeatureCard({ icon, title, description, delay }: { icon: React.ReactNode; title: string; description: string; delay: string }) {
   return (
-    <div className={`glass-card-hover rounded-2xl p-6 text-center animate-fade-in-up ${delay}`} style={{ opacity: 0 }}>
-      <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-[#00b06a]/10 border border-[#00b06a]/15 flex items-center justify-center text-[#00b06a]">
-        {icon}
-      </div>
+    <div className={`glass-card-hover rounded-2xl p-5 text-center animate-fade-in-up ${delay}`} style={{ opacity: 0 }}>
+      <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-[#00b06a]/10 border border-[#00b06a]/15 flex items-center justify-center text-[#00b06a]">{icon}</div>
       <h3 className="text-sm font-semibold mb-1">{title}</h3>
       <p className="text-xs text-muted-foreground">{description}</p>
-    </div>
-  );
-}
-
-function StepDot({ number, active, completed }: { number: number; active: boolean; completed: boolean }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 ${
-        completed
-          ? "bg-[#00b06a]/20 text-[#00b06a] border border-[#00b06a]/40"
-          : active
-          ? "bg-[#00b06a]/10 text-[#00b06a] border border-[#00b06a]/30 animate-glow-pulse"
-          : "bg-white/5 text-muted-foreground border border-white/10"
-      }`}>
-        {completed ? <CheckCircle className="w-4 h-4" /> : number}
-      </div>
     </div>
   );
 }
