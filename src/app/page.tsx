@@ -420,36 +420,32 @@ export default function CodeActivationPage() {
                         </div>
                       </div>
 
-                      {/* Compact visual table */}
-                      <details className="group">
-                        <summary className="text-[10px] text-muted-foreground/60 uppercase tracking-wider cursor-pointer hover:text-muted-foreground transition-colors">
-                          Пример вкладки Creations → Monetization → Passes ▾
-                        </summary>
-                        <div className="mt-2 rounded-lg overflow-hidden border border-white/10 text-[11px]">
-                          <div className="grid grid-cols-4 bg-white/5 border-b border-white/10 font-medium text-muted-foreground">
-                            <div className="px-2 py-1.5">Passes</div>
-                            <div className="px-2 py-1.5 border-l border-white/10 text-[#00b06a]">Pass ID</div>
-                            <div className="px-2 py-1.5 border-l border-white/10">Price</div>
-                            <div className="px-2 py-1.5 border-l border-white/10">Regional Pricing</div>
+                      {/* Visual table example */}
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Пример вкладки Creations → Monetization → Passes:</p>
+                      <div className="rounded-lg overflow-hidden border border-white/10 text-[11px]">
+                        <div className="grid grid-cols-4 bg-white/5 border-b border-white/10 font-medium text-muted-foreground">
+                          <div className="px-2 py-1.5">Passes</div>
+                          <div className="px-2 py-1.5 border-l border-white/10 text-[#00b06a]">Pass ID</div>
+                          <div className="px-2 py-1.5 border-l border-white/10">Price</div>
+                          <div className="px-2 py-1.5 border-l border-white/10">Regional Pricing</div>
+                        </div>
+                        <div className="grid grid-cols-4 items-center">
+                          <div className="px-2 py-1.5 flex items-center gap-1">
+                            <span className="text-[10px]">📝</span>
+                            <span>{gamepassInfo?.name || "Pass"}</span>
                           </div>
-                          <div className="grid grid-cols-4 items-center">
-                            <div className="px-2 py-1.5 flex items-center gap-1">
-                              <span className="text-[10px]">📝</span>
-                              <span>{gamepassInfo?.name || "Pass"}</span>
-                            </div>
-                            <div className="px-2 py-1.5 border-l border-white/10">
-                              <span className="font-mono text-[#00b06a] text-[10px] border border-[#00b06a]/30 rounded px-1 py-0.5">{extractGamePassId(gamepassInput)}</span>
-                            </div>
-                            <div className="px-2 py-1.5 border-l border-white/10 inline-flex items-center gap-0.5">
-                              <RobuxIcon /><span>{requiredPrice}</span>
-                            </div>
-                            <div className="px-2 py-1.5 border-l border-white/10">
-                              <span className="bg-white/10 rounded px-1.5 py-0.5">Disabled</span>
-                              <span className="text-red-400 ml-0.5">←</span>
-                            </div>
+                          <div className="px-2 py-1.5 border-l border-white/10">
+                            <span className="font-mono text-[#00b06a] text-[10px] border border-[#00b06a]/30 rounded px-1 py-0.5">{extractGamePassId(gamepassInput)}</span>
+                          </div>
+                          <div className="px-2 py-1.5 border-l border-white/10 inline-flex items-center gap-0.5">
+                            <RobuxIcon /><span>{requiredPrice}</span>
+                          </div>
+                          <div className="px-2 py-1.5 border-l border-white/10">
+                            <span className="bg-white/10 rounded px-1.5 py-0.5">Disabled</span>
+                            <span className="text-red-400 ml-0.5">←</span>
                           </div>
                         </div>
-                      </details>
+                      </div>
 
                       <label className="flex items-start gap-3 cursor-pointer pt-1">
                         <input type="checkbox" checked={regionalPricingConfirmed} onChange={(e) => setRegionalPricingConfirmed(e.target.checked)}
