@@ -51,6 +51,7 @@ export default function CodeActivationPage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotUploading, setScreenshotUploading] = useState(false);
   const [screenshotPath, setScreenshotPath] = useState<string | null>(null);
+  const [showScreenshotExample, setShowScreenshotExample] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -521,8 +522,15 @@ export default function CodeActivationPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">Формат: JPG, PNG или WEBP, максимум 5 МБ</p>
-                      <a href="/images/wb-example.jpg" target="_blank" className="text-xs text-[#00b06a] hover:underline">Пример скриншота →</a>
+                      <button type="button" onClick={() => setShowScreenshotExample(!showScreenshotExample)} className="text-xs text-[#00b06a] hover:underline">
+                        {showScreenshotExample ? "Скрыть пример ▴" : "Пример скриншота ▾"}
+                      </button>
                     </div>
+                    {showScreenshotExample && (
+                      <div className="rounded-xl overflow-hidden border border-white/10 animate-fade-in">
+                        <img src="/images/wb-example.jpg" alt="Пример скриншота покупки" className="w-full h-auto" />
+                      </div>
+                    )}
                   </div>
 
                   {/* Info box */}
