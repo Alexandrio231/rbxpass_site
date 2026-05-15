@@ -49,7 +49,6 @@ export default function CodeActivationPage() {
   const [gamepassInfo, setGamepassInfo] = useState<{ name: string; price: number | null; isForSale: boolean } | null>(null);
   const [regionalPricingConfirmed, setRegionalPricingConfirmed] = useState(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [screenshotUploading, setScreenshotUploading] = useState(false);
   const [screenshotPath, setScreenshotPath] = useState<string | null>(null);
   const [showScreenshotExample, setShowScreenshotExample] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -146,18 +145,14 @@ export default function CodeActivationPage() {
   };
 
   // Step 4: Upload screenshot and activate
-  const handleScreenshotUpload = async (file: File) => {
+  const handleScreenshotSelect = (file: File) => {
     setScreenshotFile(file);
-    setScreenshotUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await fetch("/api/upload-screenshot", { method: "POST", body: formData });
-      const data = await res.json();
-      setScreenshotUploading(false);
-      if (!data.ok) { setError(data.error); return; }
-      setScreenshotPath(data.path);
-    } catch { setScreenshotUploading(false); setError("Ошибка загрузки файла"); }
+    // Convert to base64 data URL
+    const reader = new FileReader();
+    reader.onload = () => {
+      setScreenshotPath(reader.result as string);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleActivation = async () => {
@@ -170,9 +165,13 @@ export default function CodeActivationPage() {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.toUpperCase(),
-          gamepassUrl: gamepassMode === "url" ? gamepassInput.trim() : `https://www.roblox.com/game-pass/${gpId}`,
+          productType: "roblox",
+          gamepassUrl: gamepassMode === "url" ? gamepassInput.trim() : undefined,
+          gamepassId: gamepassMode === "id" ? gpId : undefined,
+          regionalPricingDisabled: true,
           nickname: nickname.trim(),
           telegram: telegram.trim(),
+          screenshotData: screenshotPath,
         }),
       });
       const data = await res.json();
@@ -504,16 +503,13 @@ export default function CodeActivationPage() {
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
-                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScreenshotUpload(f); }}
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleScreenshotSelect(f); }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        disabled={screenshotUploading}
                       />
                       <div className={`flex items-center justify-center gap-2 h-12 rounded-xl border-2 border-dashed transition-all ${
                         screenshotPath ? "border-[#00b06a]/30 bg-[#00b06a]/5" : "border-white/10 hover:border-white/20 bg-white/[0.02]"
                       }`}>
-                        {screenshotUploading ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" /><span className="text-sm">Загрузка...</span></>
-                        ) : screenshotPath ? (
+                        {screenshotPath ? (
                           <><CheckCircle className="w-4 h-4 text-[#00b06a]" /><span className="text-sm text-[#00b06a]">{screenshotFile?.name}</span></>
                         ) : (
                           <><Upload className="w-4 h-4 text-muted-foreground" /><span className="text-sm text-muted-foreground">Загрузить скриншот</span></>

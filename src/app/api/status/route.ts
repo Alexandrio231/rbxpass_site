@@ -13,14 +13,13 @@ export async function GET(request: Request) {
       where: { status: "done" },
       orderBy: { created_at: "desc" },
       take: 12,
-      include: { game: { select: { name: true } } },
     });
     return NextResponse.json({
       ok: true,
       orders: orders.map(o => ({
         nickname: o.nickname.length > 6 ? o.nickname.slice(0, 4) + "..." + o.nickname.slice(-2) : o.nickname,
-        game: o.game?.name || "Roblox",
-        nominal: parseInt(o.code.split("-")[0]?.replace(/\D/g, "") || "0") || 100,
+        game: o.product_type === "fortnite" ? "Fortnite" : o.product_type === "pubg" ? "PUBG" : "Roblox",
+        nominal: 0, // nominal is on the code, not the order
       })),
     });
   }

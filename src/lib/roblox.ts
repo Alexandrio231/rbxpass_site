@@ -3,6 +3,7 @@ import { setTimeout as delay } from "node:timers/promises";
 const USERS_API = "https://users.roblox.com";
 const GAMES_API = "https://games.roblox.com";
 const THUMBNAILS_API = "https://thumbnails.roblox.com";
+const GAME_PASSES_API = "https://apis.roblox.com/game-passes/v1";
 
 export async function findUserByUsername(username: string) {
   const url = `${USERS_API}/v1/users/search?keyword=${encodeURIComponent(username)}`;
@@ -39,6 +40,32 @@ export function buildGamePassUrl(gamePassId: string | number): string {
   return `https://www.roblox.com/game-pass/${gamePassId}`;
 }
 
+export type GamePassProductInfo = {
+  TargetId: number;
+  Name: string;
+  Description?: string;
+  PriceInRobux?: number | null;
+  IsForSale?: boolean;
+  ProductId?: number;
+  Creator?: {
+    Id?: number;
+    Name?: string;
+    CreatorType?: string;
+    CreatorTargetId?: number;
+  };
+};
+
+export async function getGamePassProductInfo(gamePassId: string) {
+  const url = `${GAME_PASSES_API}/game-passes/${encodeURIComponent(gamePassId)}/product-info`;
+  const res = await fetch(url, { cache: "no-store", next: { revalidate: 0 } });
+  if (res.status === 404) return null;
+  if (!res.ok) {
+    throw new Error(`Roblox gamepass product API error: ${res.status}`);
+  }
+  const data = (await res.json()) as GamePassProductInfo;
+  return data;
+}
+
 export async function politeDelay(ms = 200) {
   await delay(ms);
 }
@@ -50,5 +77,3 @@ export async function getUserAvatar(userId: number): Promise<string | null> {
   const data = (await res.json()) as { data?: Array<{ imageUrl?: string }> };
   return data?.data?.[0]?.imageUrl ?? null;
 }
-
-

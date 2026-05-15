@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   for (const row of rows) {
     if (!row.code || !row.nominal) continue;
     try {
-      await prisma.code.upsert({
+      await prisma.legacyCode.upsert({
         where: { code: row.code },
         create: { code: row.code, nominal: row.nominal, status: row.status || "active" },
         update: { nominal: row.nominal, status: row.status || "active" },

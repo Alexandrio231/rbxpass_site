@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     const codes = await generateSecureCodes(count, prefix, nominal);
 
-    const createdCodes = await prisma.code.createMany({
+    const createdCodes = await prisma.legacyCode.createMany({
       data: codes,
     });
 
@@ -161,7 +161,7 @@ function generateChecksum(code: string): string {
 
 // Получение существующих кодов из базы
 async function getExistingCodes(): Promise<Set<string>> {
-  const existing = await prisma.code.findMany({
+  const existing = await prisma.legacyCode.findMany({
     select: { code: true },
     take: 10000, // Ограничиваем для производительности
   });
@@ -172,7 +172,7 @@ async function getExistingCodes(): Promise<Set<string>> {
 async function verifyBatchUniqueness(codes: string[]): Promise<string[]> {
   if (codes.length === 0) return [];
 
-  const existing = await prisma.code.findMany({
+  const existing = await prisma.legacyCode.findMany({
     where: {
       code: { in: codes },
     },
@@ -204,7 +204,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const stats = await prisma.code.groupBy({
+    const stats = await prisma.legacyCode.groupBy({
       by: ["status", "nominal"],
       _count: {
         _all: true,

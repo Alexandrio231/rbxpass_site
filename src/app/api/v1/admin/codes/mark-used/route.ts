@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const { code } = schema.parse(body);
     const normalized = code.trim().toUpperCase();
 
-    const existing = await prisma.code.findUnique({
+    const existing = await prisma.legacyCode.findUnique({
       where: { code: normalized },
     });
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Код уже использован" }, { status: 400 });
     }
 
-    await prisma.code.update({
+    await prisma.legacyCode.update({
       where: { id: existing.id },
       data: {
         status: "used",

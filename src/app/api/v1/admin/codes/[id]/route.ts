@@ -16,7 +16,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     }
 
     // Проверяем, существует ли код
-    const code = await prisma.code.findUnique({
+    const code = await prisma.legacyCode.findUnique({
       where: { id }
     });
 
@@ -32,7 +32,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
       }, { status: 400 });
     }
 
-    await prisma.code.delete({
+    await prisma.legacyCode.delete({
       where: { id }
     });
 

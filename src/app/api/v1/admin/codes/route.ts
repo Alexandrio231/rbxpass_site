@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   if (!verifyAdminToken(auth).ok) return new NextResponse("Unauthorized", { status: 401 });
 
   try {
-    const codes = await prisma.code.findMany({
+    const codes = await prisma.legacyCode.findMany({
       orderBy: { id: "desc" },
       take: 1000,
     });
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     // Проверяем, не существует ли уже такой код
-    const existingCode = await prisma.code.findUnique({
+    const existingCode = await prisma.legacyCode.findUnique({
       where: { code: code.toUpperCase() }
     });
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       }, { status: 409 });
     }
 
-    const newCode = await prisma.code.create({
+    const newCode = await prisma.legacyCode.create({
       data: {
         code: code.toUpperCase(),
         nominal,
