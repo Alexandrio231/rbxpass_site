@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
-import { Home, Search, BookOpen, Shield, PlayCircle, Menu } from "lucide-react";
+import { Home, Search, BookOpen, Shield, Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -34,7 +34,6 @@ export function Navigation({ currentPage }: NavigationProps) {
             <NavLink href="/" icon={Home} label="Главная" active={currentPage === "home" || currentPage === "activation"} />
             <NavLink href="/status" icon={Search} label="Статус" active={currentPage === "status"} />
             <NavLink href="/instructions" icon={BookOpen} label="Инструкция" active={currentPage === "instructions"} />
-            <NavLink href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/" icon={PlayCircle} label="Видео" external />
             <NavLink href="/support" icon={Shield} label="Поддержка" active={currentPage === "support"} />
           </div>
 
@@ -52,7 +51,6 @@ export function Navigation({ currentPage }: NavigationProps) {
                   <MobileNavLink href="/" icon={Home} label="Главная" active={currentPage === "home" || currentPage === "activation"} />
                   <MobileNavLink href="/status" icon={Search} label="Статус заказа" active={currentPage === "status"} />
                   <MobileNavLink href="/instructions" icon={BookOpen} label="Инструкция" active={currentPage === "instructions"} />
-                  <MobileNavLink href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/" icon={PlayCircle} label="Видеоинструкция" external />
                   <MobileNavLink href="/support" icon={Shield} label="Поддержка" active={currentPage === "support"} />
                 </div>
               </SheetContent>

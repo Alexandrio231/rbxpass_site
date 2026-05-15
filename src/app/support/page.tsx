@@ -1,14 +1,16 @@
 "use client";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { RobloxFloatingElements } from "@/components/roblox-elements";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, MessageCircle } from "lucide-react";
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden noise grid-pattern">
       {/* Background effects */}
+      <RobloxFloatingElements />
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-[#00b06a]/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-[#00b06a]/3 rounded-full blur-[100px]" />

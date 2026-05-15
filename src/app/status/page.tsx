@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { RobloxFloatingElements } from "@/components/roblox-elements";
 
 const statusConfig = {
   queued: {
@@ -58,8 +59,9 @@ export default function StatusPage() {
   const StatusIcon = statusInfo?.icon || AlertCircle;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden noise grid-pattern">
       {/* Background effects */}
+      <RobloxFloatingElements />
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-[#00b06a]/5 rounded-full blur-[120px]" />
         <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-[#00b06a]/3 rounded-full blur-[100px]" />

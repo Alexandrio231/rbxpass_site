@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
+import { RobloxFloatingElements, ProcessFlow } from "@/components/roblox-elements";
 
 interface Game {
   id: number;
@@ -157,11 +158,13 @@ export default function CodeActivationPage() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden noise grid-pattern">
-      {/* Ambient background orbs */}
+      {/* Roblox floating elements */}
+      <RobloxFloatingElements />
+
+      {/* Ambient glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-[#00b06a]/8 rounded-full blur-[120px] animate-float-slow" />
-        <div className="absolute top-1/3 -right-32 w-[400px] h-[400px] bg-[#00b06a]/5 rounded-full blur-[100px] animate-float-slow delay-300" />
-        <div className="absolute -bottom-40 left-1/3 w-[450px] h-[450px] bg-[#3b82f6]/5 rounded-full blur-[120px] animate-float-slow delay-500" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#00b06a]/5 rounded-full blur-[150px]" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#00b06a]/3 rounded-full blur-[150px]" />
       </div>
 
       <Navigation currentPage="activation" />
@@ -206,7 +209,7 @@ export default function CodeActivationPage() {
         </section>
 
         {/* Features - AuthKit style cards */}
-        <section className="container mx-auto px-4 pb-16">
+        <section className="container mx-auto px-4 pb-8">
           <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
             <FeatureCard
               icon={<Zap className="w-5 h-5" />}
@@ -227,6 +230,14 @@ export default function CodeActivationPage() {
               delay="delay-400"
             />
           </div>
+        </section>
+
+        {/* Process Flow Diagram */}
+        <section className="container mx-auto px-4 pb-16">
+          <div className="text-center mb-4">
+            <p className="text-sm text-muted-foreground animate-fade-in-up" style={{ opacity: 0 }}>Как это работает</p>
+          </div>
+          <ProcessFlow />
         </section>
 
         {/* Activation Form */}
