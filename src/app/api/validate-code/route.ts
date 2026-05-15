@@ -60,9 +60,21 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Ищем код в базе
+    // Ищем код в базе с информацией об игре
     const codeRow = await prisma.code.findUnique({ 
-      where: { code: normalizedCode } 
+      where: { code: normalizedCode },
+      include: {
+        game: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            category: true,
+            requires_gamepass: true,
+            description: true,
+          },
+        },
+      },
     });
     
     if (!codeRow) {
@@ -78,6 +90,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       ok: true, 
       nominal: codeRow.nominal,
+      game: codeRow.game,
       message: "Код проверен и готов к активации"
     });
     

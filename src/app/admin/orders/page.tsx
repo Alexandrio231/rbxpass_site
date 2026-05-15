@@ -62,6 +62,7 @@ export default function AdminOrders() {
   const [status, setStatus] = useState("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -79,13 +80,42 @@ export default function AdminOrders() {
   }, [q, status]);
 
   async function updateStatus(id: number, s: string) {
-    setLoading(true);
-    await fetch(`/api/v1/admin/orders/${id}`, { 
-      method: "PATCH", 
-      headers: { "Content-Type": "application/json" }, 
-      body: JSON.stringify({ status: s }) 
-    });
-    load();
+    const previousOrder = orders.find((order) => order.id === id);
+    if (!previousOrder || previousOrder.status === s) return;
+
+    setError(null);
+    setUpdatingOrderId(id);
+
+    // Optimistic update to avoid full table reload and scroll jump.
+    setOrders((current) =>
+      current.map((order) => (order.id === id ? { ...order, status: s } : order))
+    );
+
+    try {
+      const res = await fetch(`/api/v1/admin/orders/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: s }),
+      });
+
+      if (!res.ok) {
+        setOrders((current) =>
+          current.map((order) =>
+            order.id === id ? { ...order, status: previousOrder.status } : order
+          )
+        );
+        setError("Не удалось обновить статус");
+      }
+    } catch {
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === id ? { ...order, status: previousOrder.status } : order
+        )
+      );
+      setError("Ошибка обновления статуса");
+    } finally {
+      setUpdatingOrderId(idCurrent => (idCurrent === id ? null : idCurrent));
+    }
   }
 
   useEffect(() => { load(); }, [load]);
@@ -339,6 +369,7 @@ export default function AdminOrders() {
                         <TableCell>
                           <Select 
                             value={order.status} 
+                            disabled={updatingOrderId === order.id}
                             onValueChange={(value) => updateStatus(order.id, value)}
                           >
                             <SelectTrigger className="w-32">

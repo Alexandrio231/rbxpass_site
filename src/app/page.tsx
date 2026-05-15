@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,20 +12,68 @@ import {
   CheckCircle, 
   Loader2,
   Copy,
-  Sparkles
+  Sparkles,
+  Search,
+  Gamepad2
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Game {
+  id: number;
+  name: string;
+  slug: string;
+  category: string;
+  description: string | null;
+  requires_gamepass: boolean;
+}
 
 export default function CodeActivationPage() {
   const [step, setStep] = useState<1 | 2>(1);
   const [code, setCode] = useState("");
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [games, setGames] = useState<Game[]>([]);
+  const [gameSearch, setGameSearch] = useState("");
+  const [loadingGames, setLoadingGames] = useState(false);
   const [nickname, setNickname] = useState("");
+  const [telegram, setTelegram] = useState("");
   const [gamepassUrl, setGamepassUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [activationResult, setActivationResult] = useState<any>(null);
+
+  // Загружаем список игр при монтировании
+  useEffect(() => {
+    loadGames();
+  }, []);
+
+  const loadGames = async (search = "") => {
+    setLoadingGames(true);
+    try {
+      const response = await fetch(`/api/games?search=${encodeURIComponent(search)}`);
+      const data = await response.json();
+      if (data.ok) {
+        setGames(data.games);
+      }
+    } catch (err) {
+      console.error("Error loading games:", err);
+    } finally {
+      setLoadingGames(false);
+    }
+  };
+
+  const handleGameSearch = (value: string) => {
+    setGameSearch(value);
+    loadGames(value);
+  };
 
   // Валидация только для нового формата
   const validateCode = (code: string) => {
@@ -85,6 +133,7 @@ export default function CodeActivationPage() {
           code: code.toUpperCase(), 
           gamepassUrl: gamepassUrl.trim(),
           nickname: nickname.trim(),
+          telegram: telegram.trim(),
         }),
       });
       
@@ -112,7 +161,10 @@ export default function CodeActivationPage() {
 
   const resetForm = () => {
     setCode("");
+    setSelectedGame(null);
+    setGameSearch("");
     setNickname("");
+    setTelegram("");
     setGamepassUrl("");
     setStep(1);
     setError(null);
@@ -138,7 +190,7 @@ export default function CodeActivationPage() {
               <Sparkles className="w-8 h-8 text-purple-600" />
             </div>
             <p className="text-xl text-gray-600 mb-2">
-              Активируйте ваш код для получения Robux
+              Активируйте ваш код для получения игровой валюты
             </p>
           </div>
 
@@ -151,11 +203,88 @@ export default function CodeActivationPage() {
             <Progress value={progressValue} className="h-2" />
           </div>
 
-          {/* Step 1: Code Input */}
+          {/* Step 1: Game Selection and Code Input */}
           {step === 1 && (
             <Card className="shadow-xl border-2 border-purple-100">
-
               <CardContent className="space-y-6 pt-6">
+                {/* Выбор игры */}
+                <div className="space-y-3">
+                  <Label htmlFor="game" className="text-lg font-semibold flex items-center gap-2">
+                    <Gamepad2 className="w-5 h-5" />
+                    Выберите игру или сервис
+                  </Label>
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <Input
+                        placeholder="Поиск игры (Roblox, Fortnite, PS Plus...)"
+                        value={gameSearch}
+                        onChange={(e) => handleGameSearch(e.target.value)}
+                        className="pl-10"
+                        disabled={loading || loadingGames}
+                      />
+                    </div>
+                    <Select
+                      value={selectedGame?.id.toString()}
+                      onValueChange={(value) => {
+                        const game = games.find(g => g.id.toString() === value);
+                        setSelectedGame(game || null);
+                      }}
+                      disabled={loading || loadingGames}
+                    >
+                      <SelectTrigger className="w-full h-12">
+                        <SelectValue placeholder="Выберите игру из списка">
+                          {selectedGame ? (
+                            <div className="flex items-center gap-2">
+                              <span>{selectedGame.name}</span>
+                              {selectedGame.description && (
+                                <span className="text-xs text-gray-500">({selectedGame.description})</span>
+                              )}
+                            </div>
+                          ) : (
+                            "Выберите игру"
+                          )}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {loadingGames ? (
+                          <SelectItem value="loading" disabled>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin inline" />
+                            Загрузка...
+                          </SelectItem>
+                        ) : games.length === 0 ? (
+                          <SelectItem value="no-games" disabled>
+                            Игры не найдены
+                          </SelectItem>
+                        ) : (
+                          games.map((game) => (
+                            <SelectItem key={game.id} value={game.id.toString()}>
+                              <div className="flex flex-col">
+                                <span className="font-semibold">{game.name}</span>
+                                {game.description && (
+                                  <span className="text-xs text-gray-500">{game.description}</span>
+                                )}
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {selectedGame && (
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-500" />
+                        Выбрано: <strong>{selectedGame.name}</strong>
+                        {selectedGame.requires_gamepass && (
+                          <span className="text-orange-600"> (требуется GamePass)</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Ввод кода */}
                 <div className="space-y-3">
                   <Label htmlFor="code" className="text-lg font-semibold">
                     Код активации
@@ -213,6 +342,14 @@ export default function CodeActivationPage() {
               <CardContent className="space-y-6 pt-6">
                 {/* Информация о коде */}
                 <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-5 space-y-4 border">
+                  {activationResult.game && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-700">Игра/Сервис:</span>
+                      <Badge variant="secondary" className="text-base px-3 py-1">
+                        {activationResult.game.name}
+                      </Badge>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-700">Код:</span>
                     <Badge variant="secondary" className="font-mono text-lg px-3 py-1">
@@ -222,7 +359,7 @@ export default function CodeActivationPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-700">Номинал:</span>
                     <Badge className="text-lg px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-500">
-                      {activationResult.nominal} Robux
+                      {activationResult.nominal} {activationResult.game?.name === 'Roblox' ? 'Robux' : 'единиц'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
@@ -234,28 +371,54 @@ export default function CodeActivationPage() {
                   </div>
                 </div>
 
-                {/* Данные для GamePass */}
+                {/* Данные для активации */}
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="nickname">Ваш ник в Roblox</Label>
+                    <Label htmlFor="nickname">
+                      {activationResult.game?.name === 'Roblox' 
+                        ? 'Ваш ник в Roblox' 
+                        : activationResult.game?.name 
+                        ? `Ваш ник в ${activationResult.game.name}` 
+                        : 'Ваш игровой никнейм'}
+                    </Label>
                     <Input 
                       id="nickname" 
-                      placeholder="Например, SuperPlayer123"
+                      placeholder={activationResult.game?.name === 'Roblox' 
+                        ? 'Например, SuperPlayer123' 
+                        : 'Введите ваш никнейм'}
                       value={nickname}
                       onChange={(e) => setNickname(e.target.value)}
                       disabled={loading}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="gamepass">Ссылка на ваш GamePass</Label>
+                    <Label htmlFor="telegram">Ваш Telegram</Label>
                     <Input 
-                      id="gamepass" 
-                      placeholder="https://www.roblox.com/game-pass/1234567/Name"
-                      value={gamepassUrl}
-                      onChange={(e) => setGamepassUrl(e.target.value)}
+                      id="telegram" 
+                      placeholder="@username или номер телефона"
+                      value={telegram}
+                      onChange={(e) => setTelegram(e.target.value)}
                       disabled={loading}
                     />
+                    <p className="text-xs text-gray-500">
+                      Укажите ваш Telegram для связи по вопросам активации
+                    </p>
                   </div>
+                  {activationResult.game?.requires_gamepass && (
+                    <div className="space-y-2">
+                      <Label htmlFor="gamepass">Ссылка на ваш GamePass</Label>
+                      <Input 
+                        id="gamepass" 
+                        placeholder="https://www.roblox.com/game-pass/1234567/Name"
+                        value={gamepassUrl}
+                        onChange={(e) => setGamepassUrl(e.target.value)}
+                        disabled={loading}
+                      />
+                      <p className="text-xs text-gray-500">
+                        Необходимо для активации {activationResult.game.name}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
@@ -264,7 +427,7 @@ export default function CodeActivationPage() {
                 <div className="space-y-3">
                   <Button 
                     onClick={handleActivation} 
-                    disabled={loading || !nickname.trim() || !gamepassUrl.trim()}
+                    disabled={loading || !nickname.trim() || !telegram.trim() || (activationResult.game?.requires_gamepass && !gamepassUrl.trim())}
                     className="w-full h-12 text-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                     size="lg"
                   >
@@ -314,7 +477,9 @@ export default function CodeActivationPage() {
                       </div>
                       <div className="space-y-1">
                         <span className="text-gray-500 text-xs uppercase font-semibold">Номинал:</span>
-                        <p className="font-bold text-green-600 text-base">{activationResult.nominal} Robux</p>
+                        <p className="font-bold text-green-600 text-base">
+                          {activationResult.nominal} {activationResult.game?.name === 'Roblox' ? 'Robux' : 'единиц'}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <span className="text-gray-500 text-xs uppercase font-semibold">Статус:</span>

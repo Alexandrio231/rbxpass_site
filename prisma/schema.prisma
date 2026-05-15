@@ -11,29 +11,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// RBXPass data models
+// LootHub - Universal digital codes marketplace
+
+model Game {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  category    String   // robux | fortnite | ps_plus | xbox | steam | etc
+  icon_url    String?
+  description String?
+  requires_gamepass Boolean @default(false) // Для Roblox нужен GamePass
+  activation_url_template String? // Шаблон URL для активации
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  codes       Code[]
+  orders      Order[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([is_active])
+}
 
 model Order {
   id           Int      @id @default(autoincrement())
   short_code   String   @unique
   code         String
   nickname     String
+  telegram     String?
   user_id      String
-  gamepass_id  String
-  gamepass_url String
+  game_id      Int?
+  gamepass_id  String?
+  gamepass_url String?
   status       String   // queued | processing | done | error
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
+  game         Game?    @relation(fields: [game_id], references: [id])
+
   @@index([code])
   @@index([short_code])
   @@index([status])
+  @@index([game_id])
 }
 
 model Code {
-  id       Int       @id @default(autoincrement())
-  code     String    @unique
-  nominal  Int
-  status   String    // active | used
-  used_at  DateTime?
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  game_id     Int?
+  nominal     Int
+  status      String    // active | used | reserved
+  used_at     DateTime?
+  reserved_at DateTime?
+  reserved_until DateTime?
+
+  game        Game?     @relation(fields: [game_id], references: [id])
+
+  @@index([code])
+  @@index([game_id])
+  @@index([status])
 }

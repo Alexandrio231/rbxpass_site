@@ -18,11 +18,11 @@ export function Navigation({ currentPage }: NavigationProps) {
   const getPageTitle = () => {
     switch (currentPage) {
       case "instructions":
-        return "Инструкция по GamePass";
+        return "Инструкция по активации";
       case "status":
         return "Статус заказа";
       default:
-        return "Активация Robux";
+        return "LootHub - Активация кодов";
     }
   };
 
@@ -30,23 +30,47 @@ export function Navigation({ currentPage }: NavigationProps) {
     <nav className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
               <Image
                 src="/images/logo.jpg" 
-                alt="RBXPass"
+                alt="LootHub"
                 width={100} 
                 height={40} 
                 className="primary-logo w-10 h-10 rounded-lg"
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">RBXPass</h1>
+              <h1 className="text-2xl font-bold text-gray-900">LootHub</h1>
               <p className="text-xs text-gray-500">{getPageTitle()}</p>
             </div>
-          </div>
+          </Link>
           {/* Desktop actions */}
           <div className="hidden md:flex gap-2">
+            {currentPage !== "home" && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/" className="flex items-center gap-1">
+                  <Home className="w-3 h-3" />
+                  Главная
+                </Link>
+              </Button>
+            )}
+            {currentPage !== "status" && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/status" className="flex items-center gap-1">
+                  <Search className="w-3 h-3" />
+                  Статус
+                </Link>
+              </Button>
+            )}
+            {currentPage !== "instructions" && (
+              <Button asChild variant="outline" size="sm">
+                <Link href="/instructions" className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" />
+                  Инструкция
+                </Link>
+              </Button>
+            )}
             {currentPage !== "home" && (
               <Button asChild variant="outline" size="sm">
                 <Link
@@ -66,30 +90,6 @@ export function Navigation({ currentPage }: NavigationProps) {
                 >
                   <Shield className="w-3 h-3" />
                   Поддержка
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "home" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/" className="flex items-center gap-1">
-                  <Home className="w-3 h-3" />
-                  Главная
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "instructions" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/instructions" className="flex items-center gap-1">
-                  <BookOpen className="w-3 h-3" />
-                  Инструкция
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "status" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/status" className="flex items-center gap-1">
-                  <Search className="w-3 h-3" />
-                  Статус
                 </Link>
               </Button>
             )}
@@ -116,6 +116,14 @@ export function Navigation({ currentPage }: NavigationProps) {
                       </Link>
                     </Button>
                   )}
+                  {currentPage !== "status" && (
+                    <Button asChild variant="outline" size="sm">
+                      <Link href="/status" className="flex items-center gap-2">
+                        <Search className="w-4 h-4" />
+                        Статус
+                      </Link>
+                    </Button>
+                  )}
                   {currentPage !== "instructions" && (
                     <Button asChild variant="outline" size="sm">
                       <Link
@@ -124,14 +132,6 @@ export function Navigation({ currentPage }: NavigationProps) {
                       >
                         <BookOpen className="w-4 h-4" />
                         Инструкция
-                      </Link>
-                    </Button>
-                  )}
-                  {currentPage !== "status" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link href="/status" className="flex items-center gap-2">
-                        <Search className="w-4 h-4" />
-                        Статус
                       </Link>
                     </Button>
                   )}

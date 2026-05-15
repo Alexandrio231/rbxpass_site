@@ -4,8 +4,9 @@ import { z } from "zod";
 
 const bodySchema = z.object({
   code: z.string().min(1),
-  gamepassUrl: z.string().url(),
+  gamepassUrl: z.string().optional(),
   nickname: z.string().min(1),
+  telegram: z.string().min(1),
 });
 
 const CODE_REGEX = {
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
     
-    const { code, gamepassUrl, nickname } = parsed.data;
+    const { code, gamepassUrl = "", nickname, telegram } = parsed.data;
 
     // Проверяем формат кода (оба формата)
     const normalizedCode = code.toUpperCase().trim();
@@ -57,18 +58,19 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    // Проверяем, что код существует и активен
-    const codeRow = await prisma.code.findUnique({ 
-      where: { code: normalizedCode } 
+    // Проверяем, что код существует, активен и получаем связанную игру
+    const codeRow = await prisma.code.findUnique({
+      where: { code: normalizedCode },
+      include: { game: true },
     });
-    
+
     if (!codeRow) {
       return NextResponse.json({ 
         ok: false, 
         error: "Код не найден" 
       }, { status: 404 });
     }
-    
+
     if (codeRow.status !== "active") {
       return NextResponse.json({ 
         ok: false, 
@@ -76,16 +78,36 @@ export async function POST(request: Request) {
       }, { status: 409 });
     }
 
-    // Извлекаем ID GamePass из URL
-    const gamepassMatch = gamepassUrl.match(/\/game-pass\/(\d+)/);
-    if (!gamepassMatch) {
+    if (!codeRow.game_id) {
       return NextResponse.json({ 
         ok: false, 
-        error: "Неверная ссылка на GamePass" 
+        error: "Код не привязан к игре" 
       }, { status: 400 });
     }
-    
-    const gamepassId = gamepassMatch[1];
+
+    const game = codeRow.game;
+    let gamepassId: string | null = null;
+
+    // Если игра требует GamePass, проверяем URL
+    if (game?.requires_gamepass) {
+      if (!gamepassUrl.trim()) {
+        return NextResponse.json({ 
+          ok: false, 
+          error: "Необходимо указать ссылку на GamePass" 
+        }, { status: 400 });
+      }
+
+      // Извлекаем ID GamePass из URL
+      const gamepassMatch = gamepassUrl.match(/\/game-pass\/(\d+)/);
+      if (!gamepassMatch) {
+        return NextResponse.json({ 
+          ok: false, 
+          error: "Неверная ссылка на GamePass" 
+        }, { status: 400 });
+      }
+      
+      gamepassId = gamepassMatch[1];
+    }
 
     // Генерируем короткий код для отслеживания
     const shortCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -96,9 +118,11 @@ export async function POST(request: Request) {
         short_code: shortCode,
         code: normalizedCode,
         nickname,
+        telegram: telegram.trim(),
+        game_id: codeRow.game_id,
         user_id: "gamepass_user", // Для GamePass активации используем специальный ID
         gamepass_id: gamepassId,
-        gamepass_url: gamepassUrl,
+        gamepass_url: gamepassUrl.trim() || null,
         status: "queued",
       }
     });

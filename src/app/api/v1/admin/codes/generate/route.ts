@@ -165,7 +165,7 @@ async function getExistingCodes(): Promise<Set<string>> {
     select: { code: true },
     take: 10000, // Ограничиваем для производительности
   });
-  return new Set(existing.map((c) => c.code));
+  return new Set(existing.map((c: { code: string }) => c.code));
 }
 
 // Проверка уникальности батча кодов в базе данных
@@ -179,7 +179,7 @@ async function verifyBatchUniqueness(codes: string[]): Promise<string[]> {
     select: { code: true },
   });
 
-  const existingSet = new Set(existing.map((c) => c.code));
+  const existingSet = new Set(existing.map((c: { code: string }) => c.code));
   return codes.filter((code) => !existingSet.has(code));
 }
 

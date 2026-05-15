@@ -8,9 +8,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RBXPass - Активация Robux через GamePass",
-  description: "Безопасная и быстрая активация Robux через GamePass в Roblox",
-  keywords: ["Roblox", "Robux", "GamePass", "активация", "RBXPass"],
+  title: "LootHub - Универсальный магазин цифровых кодов",
+  description: "Активация кодов для Roblox, Fortnite, PlayStation Plus, Xbox Game Pass, Steam и других игр",
+  keywords: ["LootHub", "коды активации", "Roblox", "Fortnite", "PS Plus", "Xbox", "Steam", "цифровые товары"],
 };
 
 export default function RootLayout({
