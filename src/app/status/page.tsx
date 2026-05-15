@@ -61,8 +61,8 @@ export default function StatusPage() {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-blue-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-purple-600/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-[#00b06a]/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/3 left-1/3 w-64 h-64 bg-[#00b06a]/3 rounded-full blur-[100px]" />
       </div>
 
       <Navigation currentPage="status" />
@@ -101,7 +101,7 @@ export default function StatusPage() {
                   <Button
                     onClick={check}
                     disabled={loading || !code.trim()}
-                    className="px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500"
+                    className="px-6 bg-gradient-to-r from-[#00b06a] to-[#00d47e] hover:from-[#00c876] hover:to-[#00e88a] shadow-lg shadow-[#00b06a]/20"
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

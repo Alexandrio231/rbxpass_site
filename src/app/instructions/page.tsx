@@ -12,6 +12,7 @@ import {
   Settings,
   Link as LinkIcon,
   DollarSign,
+  PlayCircle,
 } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
@@ -58,7 +59,7 @@ export default function InstructionsPage() {
     {
       number: 5,
       title: "Укажите цену",
-      description: "После создания откройте GamePass, нажмите Configure → Sales, включите «Item for Sale» и укажите цену в Robux",
+      description: "После создания откройте GamePass, нажмите Configure → Sales, включите «Item for Sale» и укажите цену в Robux (смотрите таблицу ниже)",
       icon: DollarSign,
     },
     {
@@ -82,25 +83,68 @@ export default function InstructionsPage() {
     },
   ];
 
+  // Full price table from the screenshot
   const priceTable = [
-    { nominal: "101", price: "131" },
+    { nominal: "200", price: "260" },
     { nominal: "201", price: "261" },
+    { nominal: "250", price: "325" },
+    { nominal: "300", price: "390" },
     { nominal: "301", price: "391" },
+    { nominal: "350", price: "455" },
+    { nominal: "400", price: "520" },
     { nominal: "401", price: "521" },
+    { nominal: "450", price: "585" },
+    { nominal: "500", price: "650" },
     { nominal: "501", price: "651" },
+    { nominal: "550", price: "715" },
+    { nominal: "600", price: "780" },
     { nominal: "601", price: "781" },
+    { nominal: "650", price: "845" },
+    { nominal: "700", price: "910" },
     { nominal: "701", price: "911" },
+    { nominal: "750", price: "975" },
+    { nominal: "800", price: "1040" },
     { nominal: "801", price: "1041" },
+    { nominal: "850", price: "1105" },
+    { nominal: "900", price: "1170" },
     { nominal: "901", price: "1171" },
+    { nominal: "950", price: "1235" },
+    { nominal: "1000", price: "1300" },
     { nominal: "1001", price: "1301" },
+    { nominal: "1200", price: "1560" },
     { nominal: "1201", price: "1561" },
+    { nominal: "1250", price: "1625" },
+    { nominal: "1300", price: "1690" },
+    { nominal: "1301", price: "1691" },
+    { nominal: "1400", price: "1820" },
     { nominal: "1401", price: "1821" },
-    { nominal: "1601", price: "2081" },
-    { nominal: "1701", price: "2211" },
+    { nominal: "1500", price: "1950" },
+    { nominal: "1501", price: "1951" },
+    { nominal: "1800", price: "2340" },
+    { nominal: "1801", price: "2341" },
+    { nominal: "2000", price: "2600" },
     { nominal: "2001", price: "2601" },
+    { nominal: "2500", price: "3250" },
     { nominal: "2501", price: "3251" },
+    { nominal: "3000", price: "3900" },
     { nominal: "3001", price: "3901" },
+    { nominal: "3500", price: "4550" },
+    { nominal: "3501", price: "4551" },
+    { nominal: "4000", price: "5200" },
+    { nominal: "4001", price: "5201" },
+    { nominal: "4500", price: "5850" },
     { nominal: "4501", price: "5851" },
+    { nominal: "5000", price: "6500" },
+    { nominal: "5001", price: "6501" },
+    { nominal: "6000", price: "7800" },
+    { nominal: "6001", price: "7801" },
+    { nominal: "7000", price: "9100" },
+    { nominal: "7001", price: "9101" },
+    { nominal: "8000", price: "10400" },
+    { nominal: "8001", price: "10401" },
+    { nominal: "9000", price: "11700" },
+    { nominal: "9001", price: "11701" },
+    { nominal: "10000", price: "13000" },
     { nominal: "10001", price: "13001" },
   ];
 
@@ -108,8 +152,8 @@ export default function InstructionsPage() {
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-0 right-1/3 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-purple-600/8 rounded-full blur-3xl" />
+        <div className="absolute top-0 right-1/3 w-96 h-96 bg-[#00b06a]/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-1/4 left-1/4 w-72 h-72 bg-[#00b06a]/3 rounded-full blur-[100px]" />
       </div>
 
       <Navigation currentPage="instructions" />
@@ -126,6 +170,28 @@ export default function InstructionsPage() {
             </p>
           </div>
 
+          {/* Video Section */}
+          <Card className="glass-card border-white/10 mb-8 animate-fade-in-up delay-100" style={{ opacity: 0 }}>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <PlayCircle className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-semibold">Видеоинструкция</h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Посмотрите видео, если предпочитаете наглядное объяснение
+              </p>
+              <div className="aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                <iframe
+                  src="https://rutube.ru/play/embed/a2652268ba8a379f99c77eecb5ac7745"
+                  className="w-full h-full"
+                  allowFullScreen
+                  allow="autoplay"
+                  title="Видеоинструкция по созданию GamePass"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Steps */}
           <div className="space-y-4">
             {steps.map((step, index) => {
@@ -133,16 +199,16 @@ export default function InstructionsPage() {
               return (
                 <Card
                   key={step.number}
-                  className="glass-card border-white/10 animate-fade-in-up"
-                  style={{ opacity: 0, animationDelay: `${index * 0.08}s`, animationFillMode: "forwards" }}
+                  className="glass-card border-white/10 animate-fade-in-up hover:border-primary/20 transition-all duration-300"
+                  style={{ opacity: 0, animationDelay: `${0.15 + index * 0.08}s`, animationFillMode: "forwards" }}
                 >
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
                       <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <Badge variant="outline" className="text-xs border-white/20 text-muted-foreground">
                             Шаг {step.number}
                           </Badge>
@@ -187,28 +253,29 @@ export default function InstructionsPage() {
           </div>
 
           {/* Price Table */}
-          <Card className="glass-card border-white/10 mt-10">
+          <Card className="glass-card border-white/10 mt-10 animate-fade-in-up" style={{ opacity: 0, animationDelay: "0.8s", animationFillMode: "forwards" }}>
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-4">
                 <DollarSign className="w-5 h-5 text-green-400" />
-                <h2 className="text-lg font-semibold">Таблица цен GamePass</h2>
+                <h2 className="text-lg font-semibold">Таблица номиналов и цен GamePass</h2>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Укажите соответствующую цену для вашего номинала кода
+                Найдите ваш купленный номинал и укажите соответствующую цену при создании GamePass.
+                Формула: цена GamePass = номинал × 1.3 (округлённо).
               </p>
-              <div className="overflow-x-auto rounded-lg border border-white/10">
+              <div className="overflow-x-auto rounded-lg border border-white/10 max-h-[500px] overflow-y-auto">
                 <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/10 bg-white/5">
-                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">Купленный номинал</th>
+                  <thead className="sticky top-0 z-10">
+                    <tr className="border-b border-white/10 bg-card">
+                      <th className="px-4 py-3 text-left font-medium text-muted-foreground">Купленный номинал (Robux)</th>
                       <th className="px-4 py-3 text-left font-medium text-muted-foreground">Цена GamePass</th>
                     </tr>
                   </thead>
                   <tbody>
                     {priceTable.map((row, i) => (
                       <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                        <td className="px-4 py-2.5 font-mono text-sm">Roblox {row.nominal}</td>
-                        <td className="px-4 py-2.5 font-mono text-sm text-green-400">{row.price}</td>
+                        <td className="px-4 py-2 font-mono text-sm">{row.nominal}</td>
+                        <td className="px-4 py-2 font-mono text-sm text-green-400">{row.price}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -218,7 +285,7 @@ export default function InstructionsPage() {
           </Card>
 
           {/* Important Info */}
-          <Card className="glass-card border-white/10 mt-6">
+          <Card className="glass-card border-white/10 mt-6 animate-fade-in-up" style={{ opacity: 0, animationDelay: "0.9s", animationFillMode: "forwards" }}>
             <CardContent className="p-6 space-y-3">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-400" />
@@ -241,6 +308,12 @@ export default function InstructionsPage() {
                   <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
                   <p className="text-sm text-muted-foreground">
                     <strong className="text-foreground">Поддержка:</strong> Если возникли вопросы — обратитесь в Telegram @loothub_support
+                  </p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-2 flex-shrink-0" />
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Цена GamePass:</strong> Если вашего номинала нет в таблице — умножьте его на 1.3 и округлите вверх
                   </p>
                 </div>
               </div>
