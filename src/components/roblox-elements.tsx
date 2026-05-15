@@ -103,12 +103,12 @@ export function ProcessFlow() {
         {/* Step 1 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-200" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#00b06a]/20 to-[#00b06a]/5 border-2 border-[#00b06a]/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-[#00b06a]/60 hover:shadow-lg hover:shadow-[#00b06a]/20 transition-all duration-300 group">
-            {/* Roblox-style code/ticket icon */}
+            {/* Golden ticket icon */}
             <svg className="w-10 h-10 md:w-12 md:h-12 group-hover:scale-110 transition-transform" viewBox="0 0 48 48" fill="none">
-              <rect x="8" y="16" width="32" height="16" rx="3" fill="#00b06a" opacity="0.9"/>
-              <rect x="10" y="18" width="28" height="12" rx="2" fill="none" stroke="#004d2e" strokeWidth="1" strokeDasharray="3 2"/>
-              <circle cx="8" cy="24" r="3" fill="#0a0a0f"/><circle cx="40" cy="24" r="3" fill="#0a0a0f"/>
-              <text x="24" y="26" textAnchor="middle" fill="#004d2e" fontSize="7" fontWeight="bold" fontFamily="monospace">CODE</text>
+              <rect x="6" y="14" width="36" height="20" rx="3" fill="#E8A820" transform="rotate(-8 24 24)"/>
+              <line x1="12" y1="20" x2="34" y2="17" stroke="#8B6914" strokeWidth="1.2"/>
+              <line x1="12" y1="24" x2="34" y2="21" stroke="#8B6914" strokeWidth="1.2"/>
+              <path d="M20 30 L22 28 L24 30 L26 28 L28 30" stroke="#8B6914" strokeWidth="1" strokeLinecap="round" fill="none"/>
             </svg>
           </div>
           <div className="w-7 h-7 rounded-full bg-[#00b06a] text-white text-sm font-bold flex items-center justify-center mb-2 shadow-lg shadow-[#00b06a]/30">
@@ -123,7 +123,7 @@ export function ProcessFlow() {
         {/* Step 2 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-400" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-2 border-blue-500/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
-            {/* Roblox-style gamepass icon */}
+            {/* GamePass card icon */}
             <svg className="w-10 h-10 md:w-12 md:h-12 group-hover:scale-110 transition-transform" viewBox="0 0 48 48" fill="none">
               <rect x="10" y="10" width="28" height="28" rx="6" fill="#3b82f6" opacity="0.9"/>
               <rect x="14" y="14" width="20" height="20" rx="4" fill="none" stroke="#1e3a5f" strokeWidth="1.5"/>
@@ -142,12 +142,11 @@ export function ProcessFlow() {
         {/* Step 3 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-600" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-2 border-yellow-500/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-yellow-500/60 hover:shadow-lg hover:shadow-yellow-500/20 transition-all duration-300 group animate-bounce-subtle">
-            {/* Roblox Robux coin icon */}
+            {/* Robux hexagon icon - matching the official logo */}
             <svg className="w-10 h-10 md:w-12 md:h-12 group-hover:scale-110 transition-transform" viewBox="0 0 48 48" fill="none">
-              <path d="M24 6L42 15V33L24 42L6 33V15L24 6Z" fill="#E8A820" opacity="0.9"/>
-              <path d="M24 10L38 17.5V30.5L24 38L10 30.5V17.5L24 10Z" fill="none" stroke="#8B6914" strokeWidth="1.5"/>
-              <circle cx="24" cy="24" r="8" fill="none" stroke="#8B6914" strokeWidth="2"/>
-              <rect x="21" y="21" width="6" height="6" rx="1" fill="#8B6914" opacity="0.7"/>
+              <path d="M24 4L43 14V34L24 44L5 34V14L24 4Z" fill="none" stroke="#E8A820" strokeWidth="3.5" strokeLinejoin="round"/>
+              <path d="M24 12L36 18.5V31.5L24 38L12 31.5V18.5L24 12Z" fill="none" stroke="#E8A820" strokeWidth="2.5" strokeLinejoin="round"/>
+              <rect x="20" y="20" width="8" height="8" rx="1" fill="#E8A820"/>
             </svg>
           </div>
           <div className="w-7 h-7 rounded-full bg-yellow-500 text-white text-sm font-bold flex items-center justify-center mb-2 shadow-lg shadow-yellow-500/30">
