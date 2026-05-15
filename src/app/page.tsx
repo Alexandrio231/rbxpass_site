@@ -521,7 +521,7 @@ export default function CodeActivationPage() {
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">Формат: JPG, PNG или WEBP, максимум 5 МБ</p>
-                      <a href="/images/screenshot-example.jpg" target="_blank" className="text-xs text-[#00b06a] hover:underline">Пример скриншота →</a>
+                      <a href="/images/wb-example.jpg" target="_blank" className="text-xs text-[#00b06a] hover:underline">Пример скриншота →</a>
                     </div>
                   </div>
 
