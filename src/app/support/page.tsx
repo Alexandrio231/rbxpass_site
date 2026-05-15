@@ -107,24 +107,26 @@ export default function SupportPage() {
 
           {/* Telegram Bot Chat Widget */}
           <div className="mt-8 animate-fade-in-up delay-400" style={{ opacity: 0 }}>
-            <Card className="glass-card border-white/10 overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-4 border-b border-white/10 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#2AABEE]/10 flex items-center justify-center">
-                    <MessageCircle className="w-5 h-5 text-[#2AABEE]" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm">Чат поддержки</h3>
-                    <p className="text-xs text-muted-foreground">Напишите нам прямо здесь</p>
-                  </div>
+            <Card className="glass-card border-white/10">
+              <CardContent className="p-6 text-center space-y-4">
+                <div className="w-14 h-14 mx-auto rounded-full bg-[#2AABEE]/10 flex items-center justify-center">
+                  <MessageCircle className="w-7 h-7 text-[#2AABEE]" />
                 </div>
-                <div className="h-[400px]">
-                  <iframe
-                    src="https://t.me/loothub_support"
-                    className="w-full h-full border-0"
-                    title="Telegram чат поддержки"
-                  />
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Онлайн-чат</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Напишите нам в Telegram — ответим в течение нескольких минут
+                  </p>
                 </div>
+                <a
+                  href="https://t.me/loothub_support"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-[#2AABEE] hover:bg-[#229ED9] text-white font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#2AABEE]/20"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Открыть чат в Telegram
+                </a>
               </CardContent>
             </Card>
           </div>
