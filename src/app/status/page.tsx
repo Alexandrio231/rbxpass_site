@@ -6,61 +6,58 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
+import { Loader2, Search, CheckCircle, Clock, XCircle, AlertCircle, User } from "lucide-react";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { RobloxFloatingElements } from "@/components/roblox-elements";
 
 const statusConfig = {
-  queued: {
-    label: "В очереди",
-    color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    icon: Clock,
-    description: "Ваш заказ добавлен в очередь на обработку",
-  },
-  processing: {
-    label: "В обработке",
-    color: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    icon: Loader2,
-    description: "Заказ обрабатывается, пожалуйста, подождите",
-  },
-  done: {
-    label: "Выполнен",
-    color: "bg-green-500/20 text-green-400 border-green-500/30",
-    icon: CheckCircle,
-    description: "Заказ успешно выполнен! Robux должны быть на вашем аккаунте",
-  },
-  error: {
-    label: "Ошибка",
-    color: "bg-red-500/20 text-red-400 border-red-500/30",
-    icon: XCircle,
-    description: "Произошла ошибка при обработке заказа",
-  },
+  queued: { label: "В очереди", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", icon: Clock, description: "Заказ ожидает обработки" },
+  processing: { label: "В обработке", color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: Loader2, description: "Заказ обрабатывается" },
+  done: { label: "Выполнен", color: "bg-green-500/20 text-green-400 border-green-500/30", icon: CheckCircle, description: "Robux зачислены!" },
+  error: { label: "Ошибка", color: "bg-red-500/20 text-red-400 border-red-500/30", icon: XCircle, description: "Обратитесь в поддержку" },
 };
 
+interface OrderResult {
+  short_code: string;
+  status: string;
+  nickname?: string;
+  created_at: string;
+}
+
 export default function StatusPage() {
-  const [code, setCode] = useState("");
+  const [searchType, setSearchType] = useState<"code" | "nickname">("nickname");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [orders, setOrders] = useState<OrderResult[]>([]);
+  const [singleOrder, setSingleOrder] = useState<OrderResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function check() {
     setLoading(true);
     setError(null);
-    setStatus(null);
-    const res = await fetch(`/api/status?code=${encodeURIComponent(code)}`);
+    setOrders([]);
+    setSingleOrder(null);
+
+    const param = searchType === "nickname" ? `nickname=${encodeURIComponent(query)}` : `code=${encodeURIComponent(query.toUpperCase())}`;
+    const res = await fetch(`/api/status?${param}`);
     const data = await res.json();
     setLoading(false);
-    if (!data.ok) return setError(data.error ?? "Заказ не найден");
-    setStatus(data.order.status);
-  }
 
-  const statusInfo = status ? statusConfig[status as keyof typeof statusConfig] : null;
-  const StatusIcon = statusInfo?.icon || AlertCircle;
+    if (!data.ok) {
+      setError(data.error ?? "Не найдено");
+      return;
+    }
+
+    if (data.orders) {
+      setOrders(data.orders);
+    } else if (data.order) {
+      setSingleOrder(data.order);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden noise grid-pattern">
-      {/* Background effects */}
       <RobloxFloatingElements />
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-[#00b06a]/5 rounded-full blur-[120px]" />
@@ -73,104 +70,115 @@ export default function StatusPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8 animate-fade-in-up">
-            <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-3">
-              Статус заказа
-            </h1>
-            <p className="text-muted-foreground">
-              Проверьте текущий статус вашего заказа
-            </p>
+            <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-3">Статус заказа</h1>
+            <p className="text-muted-foreground">Проверьте статус по нику Roblox или коду заказа</p>
           </div>
 
           {/* Main Card */}
-          <Card className="glass-card border-white/10 shadow-2xl animate-fade-in-up delay-100" style={{ opacity: 0 }}>
-            <CardHeader className="border-b border-white/10">
-              <CardTitle className="text-xl">Проверка статуса</CardTitle>
-              <CardDescription>
-                Введите код заказа из подтверждения активации
-              </CardDescription>
+          <Card className="glass-card border-white/8 shadow-2xl animate-scale-in">
+            <CardHeader className="border-b border-white/5">
+              <CardTitle className="text-xl">Поиск заказа</CardTitle>
+              <CardDescription>Найдите ваш заказ по нику в Roblox или короткому коду</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-5 pt-6">
+              {/* Search type toggle */}
+              <div className="flex gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/8">
+                <button
+                  onClick={() => { setSearchType("nickname"); setQuery(""); setError(null); setOrders([]); setSingleOrder(null); }}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    searchType === "nickname" ? "bg-[#00b06a]/10 text-[#00b06a] border border-[#00b06a]/20" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  По нику Roblox
+                </button>
+                <button
+                  onClick={() => { setSearchType("code"); setQuery(""); setError(null); setOrders([]); setSingleOrder(null); }}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    searchType === "code" ? "bg-[#00b06a]/10 text-[#00b06a] border border-[#00b06a]/20" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Search className="w-4 h-4" />
+                  По коду заказа
+                </button>
+              </div>
+
+              {/* Search input */}
               <div className="space-y-2">
-                <Label htmlFor="status-code" className="text-sm">Код заказа</Label>
+                <Label htmlFor="search-query" className="text-sm">
+                  {searchType === "nickname" ? "Ник в Roblox" : "Код заказа"}
+                </Label>
                 <div className="flex gap-2">
                   <Input
-                    id="status-code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.toUpperCase())}
-                    placeholder="ABC123"
-                    className="font-mono bg-input/50 border-white/10 focus:border-primary/50"
+                    id="search-query"
+                    value={query}
+                    onChange={(e) => setQuery(searchType === "code" ? e.target.value.toUpperCase() : e.target.value)}
+                    placeholder={searchType === "nickname" ? "Ваш ник в Roblox" : "ABC123"}
+                    className="font-mono bg-[#1a1a28] border-white/10 focus:border-[#00b06a]/50 rounded-xl"
+                    onKeyDown={(e) => e.key === "Enter" && query.trim() && check()}
                   />
                   <Button
                     onClick={check}
-                    disabled={loading || !code.trim()}
-                    className="px-6 bg-gradient-to-r from-[#00b06a] to-[#00d47e] hover:from-[#00c876] hover:to-[#00e88a] shadow-lg shadow-[#00b06a]/20"
+                    disabled={loading || !query.trim()}
+                    className="px-6 btn-roblox rounded-xl"
                   >
-                    {loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Search className="w-4 h-4 mr-2" />
-                        Проверить
-                      </>
-                    )}
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   </Button>
                 </div>
               </div>
 
-              {/* Status Display */}
-              {status && statusInfo && (
-                <div className="animate-scale-in rounded-xl p-5 bg-white/5 border border-white/10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <StatusIcon className="h-5 w-5 text-primary" />
-                    <span className="font-medium">Текущий статус:</span>
-                    <Badge className={statusInfo.color}>{statusInfo.label}</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{statusInfo.description}</p>
+              {/* Single order result */}
+              {singleOrder && (
+                <OrderCard order={singleOrder} />
+              )}
+
+              {/* Multiple orders result */}
+              {orders.length > 0 && (
+                <div className="space-y-3 animate-fade-in">
+                  <p className="text-sm text-muted-foreground">Найдено заказов: {orders.length}</p>
+                  {orders.map((order) => (
+                    <OrderCard key={order.short_code} order={order} />
+                  ))}
                 </div>
               )}
 
-              {/* Error Message */}
+              {/* Error */}
               {error && (
-                <Alert variant="destructive" className="border-red-500/30 bg-red-500/10 animate-fade-in">
-                  <XCircle className="h-4 w-4" />
+                <Alert variant="destructive" className="border-red-500/20 bg-red-500/5 rounded-xl animate-fade-in">
+                  <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-
-              {/* Help Text */}
-              <div className="rounded-xl p-4 bg-primary/5 border border-primary/20">
-                <h3 className="font-medium text-sm mb-1">Где найти код заказа?</h3>
-                <p className="text-xs text-muted-foreground">
-                  Короткий код заказа (например, ABC123) вы получили после успешной активации.
-                  Он отображается в сообщении подтверждения.
-                </p>
-              </div>
             </CardContent>
           </Card>
-
-          {/* Status Legend */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-3 animate-fade-in-up delay-300" style={{ opacity: 0 }}>
-            {Object.entries(statusConfig).map(([key, config]) => {
-              const Icon = config.icon;
-              return (
-                <div key={key} className="glass-card rounded-xl p-4 border-white/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium">{config.label}</h3>
-                      <p className="text-xs text-muted-foreground">{config.description.split(".")[0]}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
 
       <Footer />
+    </div>
+  );
+}
+
+function OrderCard({ order }: { order: OrderResult }) {
+  const statusInfo = statusConfig[order.status as keyof typeof statusConfig];
+  const StatusIcon = statusInfo?.icon || AlertCircle;
+
+  return (
+    <div className="rounded-xl p-4 bg-white/[0.03] border border-white/8 animate-scale-in">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <StatusIcon className="w-4 h-4 text-[#00b06a]" />
+          <span className="text-sm font-medium">Заказ: {order.short_code}</span>
+        </div>
+        {statusInfo && <Badge className={statusInfo.color}>{statusInfo.label}</Badge>}
+      </div>
+      <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <span>{statusInfo?.description}</span>
+        <span>{new Date(order.created_at).toLocaleDateString("ru-RU")}</span>
+      </div>
+      {order.nickname && (
+        <p className="text-xs text-muted-foreground mt-1">Ник: {order.nickname}</p>
+      )}
     </div>
   );
 }

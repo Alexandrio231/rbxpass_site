@@ -99,17 +99,7 @@ function PlusIcon({ size = 20 }: { size?: number }) {
 export function ProcessFlow() {
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-4 relative">
-        {/* Connecting lines (desktop only) */}
-        <div className="hidden md:block absolute top-16 left-[calc(33%-20px)] w-[calc(34%+40px)] h-[2px]">
-          <div className="w-full h-full bg-gradient-to-r from-[#00b06a]/30 via-[#00b06a]/50 to-[#00b06a]/30 rounded-full" />
-          <div className="absolute top-0 left-0 w-3 h-3 -translate-y-[5px] rounded-full bg-[#00b06a]/40" />
-          <div className="absolute top-0 right-0 w-3 h-3 -translate-y-[5px] rounded-full bg-[#00b06a]/40" />
-          {/* Animated dot */}
-          <div className="absolute top-0 -translate-y-[3px] w-2 h-2 rounded-full bg-[#00b06a] shadow-lg shadow-[#00b06a]/50 animate-[travel_3s_ease-in-out_infinite]" 
-               style={{ animation: "travel 3s ease-in-out infinite" }} />
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
         {/* Step 1 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-200" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#00b06a]/20 to-[#00b06a]/5 border-2 border-[#00b06a]/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-[#00b06a]/60 hover:shadow-lg hover:shadow-[#00b06a]/20 transition-all duration-300 group">
@@ -124,13 +114,6 @@ export function ProcessFlow() {
           </p>
         </div>
 
-        {/* Mobile arrow */}
-        <div className="flex md:hidden justify-center -my-2">
-          <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
-            <path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#00b06a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-          </svg>
-        </div>
-
         {/* Step 2 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-400" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-2 border-blue-500/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
@@ -143,13 +126,6 @@ export function ProcessFlow() {
           <p className="text-xs text-muted-foreground leading-relaxed">
             По нашей инструкции за 2 минуты
           </p>
-        </div>
-
-        {/* Mobile arrow */}
-        <div className="flex md:hidden justify-center -my-2">
-          <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
-            <path d="M12 0 L12 24 M6 18 L12 24 L18 18" stroke="#00b06a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-          </svg>
         </div>
 
         {/* Step 3 */}
