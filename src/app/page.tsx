@@ -413,10 +413,11 @@ export default function CodeActivationPage() {
                         <Badge variant="outline" className="text-xs bg-white/5">Disabled</Badge> ← так должно быть.
                       </p>
                       <p className="text-xs text-yellow-400/70">
-                        Если статус не Disabled, выключите Regional Pricing и снова нажмите &quot;Проверить GamePass&quot;.
+                        Если статус <strong>Enabled</strong> — выключите Regional Pricing и снова нажмите &quot;Проверить GamePass&quot;.
                       </p>
 
                       {/* Visual table example */}
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Пример вкладки Creations → Monetization → Passes:</p>
                       <div className="rounded-lg overflow-hidden border border-white/10 text-xs">
                         <div className="grid grid-cols-4 bg-white/5 border-b border-white/10 font-medium text-muted-foreground">
                           <div className="px-3 py-2">Passes</div>
