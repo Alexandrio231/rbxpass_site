@@ -95,90 +95,181 @@ function PlusIcon({ size = 20 }: { size?: number }) {
   );
 }
 
-// Process flow diagram component
+// Process flow diagram component - circuit board style like AuthKit
 export function ProcessFlow() {
   return (
-    <div className="w-full max-w-4xl mx-auto py-8">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
-        {/* Step 1 */}
-        <FlowStep
-          number={1}
-          title="Введи код"
-          description="Код из покупки"
-          icon={
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="16" rx="2" />
-              <path d="M7 8h4M7 12h10M7 16h6" strokeLinecap="round" />
-            </svg>
-          }
-          delay="delay-100"
-        />
+    <div className="w-full max-w-4xl mx-auto py-12 relative">
+      {/* Circuit board background lines */}
+      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 800 400" fill="none" preserveAspectRatio="xMidYMid meet">
+        {/* Horizontal lines */}
+        <path d="M0 200 L200 200" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        <path d="M600 200 L800 200" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        <path d="M300 200 L500 200" stroke="rgba(0,176,106,0.15)" strokeWidth="1.5" className="animate-pulse" />
+        
+        {/* Vertical lines */}
+        <path d="M400 0 L400 120" stroke="rgba(0,176,106,0.08)" strokeWidth="1" />
+        <path d="M400 280 L400 400" stroke="rgba(0,176,106,0.08)" strokeWidth="1" />
+        
+        {/* Diagonal connectors */}
+        <path d="M250 200 L320 140" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        <path d="M550 200 L480 140" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        <path d="M250 200 L320 260" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        <path d="M550 200 L480 260" stroke="rgba(0,176,106,0.1)" strokeWidth="1" />
+        
+        {/* Corner connectors */}
+        <path d="M100 100 L100 150 L200 150" stroke="rgba(0,176,106,0.06)" strokeWidth="1" />
+        <path d="M700 100 L700 150 L600 150" stroke="rgba(0,176,106,0.06)" strokeWidth="1" />
+        <path d="M100 300 L100 250 L200 250" stroke="rgba(0,176,106,0.06)" strokeWidth="1" />
+        <path d="M700 300 L700 250 L600 250" stroke="rgba(0,176,106,0.06)" strokeWidth="1" />
+        
+        {/* Small dots at intersections */}
+        <circle cx="200" cy="200" r="3" fill="rgba(0,176,106,0.2)" />
+        <circle cx="600" cy="200" r="3" fill="rgba(0,176,106,0.2)" />
+        <circle cx="400" cy="120" r="2" fill="rgba(0,176,106,0.15)" />
+        <circle cx="400" cy="280" r="2" fill="rgba(0,176,106,0.15)" />
+        <circle cx="100" cy="150" r="2" fill="rgba(0,176,106,0.1)" />
+        <circle cx="700" cy="150" r="2" fill="rgba(0,176,106,0.1)" />
+        
+        {/* Animated pulse dots traveling along paths */}
+        <circle r="3" fill="#00b06a" opacity="0.6">
+          <animateMotion dur="4s" repeatCount="indefinite" path="M200 200 L400 200" />
+        </circle>
+        <circle r="3" fill="#00b06a" opacity="0.6">
+          <animateMotion dur="4s" repeatCount="indefinite" path="M400 200 L600 200" begin="2s" />
+        </circle>
+        <circle r="2" fill="#00b06a" opacity="0.4">
+          <animateMotion dur="3s" repeatCount="indefinite" path="M400 120 L400 200" begin="1s" />
+        </circle>
+      </svg>
 
-        {/* Arrow */}
-        <FlowArrow />
+      {/* Main grid layout */}
+      <div className="relative z-10 grid grid-cols-3 grid-rows-3 gap-4 md:gap-6 max-w-2xl mx-auto">
+        {/* Top row - side nodes */}
+        <div className="flex justify-center items-end">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M7 8h4M7 12h10M7 16h6" strokeLinecap="round" />
+              </svg>
+            }
+            label="Ваш код"
+            size="sm"
+          />
+        </div>
+        <div /> {/* empty center top */}
+        <div className="flex justify-center items-end">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v4l2 2" strokeLinecap="round" />
+              </svg>
+            }
+            label="Проверка"
+            size="sm"
+          />
+        </div>
 
-        {/* Step 2 */}
-        <FlowStep
-          number={2}
-          title="Создай GamePass"
-          description="По инструкции"
-          icon={
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="3" width="20" height="18" rx="3" />
-              <path d="M8 12l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          }
-          delay="delay-300"
-        />
+        {/* Middle row - main center node */}
+        <div className="flex justify-center items-center">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="3" width="20" height="18" rx="3" />
+                <path d="M8 12l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            }
+            label="GamePass"
+            size="sm"
+          />
+        </div>
+        <div className="flex justify-center items-center">
+          <CircuitNode
+            icon={
+              <svg className="w-8 h-8" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="12" stroke="#00b06a" strokeWidth="2" />
+                <circle cx="16" cy="16" r="7" stroke="#00b06a" strokeWidth="1.5" opacity="0.5" />
+                <text x="16" y="20" textAnchor="middle" fill="#00b06a" fontSize="10" fontWeight="bold" fontFamily="sans-serif">R$</text>
+              </svg>
+            }
+            label="RBXPass"
+            size="lg"
+            highlighted
+          />
+        </div>
+        <div className="flex justify-center items-center">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            }
+            label="Ваш аккаунт"
+            size="sm"
+          />
+        </div>
 
-        {/* Arrow */}
-        <FlowArrow />
-
-        {/* Step 3 */}
-        <FlowStep
-          number={3}
-          title="Получи Robux"
-          description="5-7 дней"
-          icon={
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="9" />
-              <text x="12" y="16" textAnchor="middle" fill="currentColor" fontSize="9" fontWeight="bold" stroke="none">R$</text>
-            </svg>
-          }
-          delay="delay-500"
-        />
+        {/* Bottom row */}
+        <div className="flex justify-center items-start">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="2" y="2" width="20" height="20" rx="5" />
+                <circle cx="8" cy="9" r="2" fill="currentColor" opacity="0.6" />
+                <circle cx="16" cy="9" r="2" fill="currentColor" opacity="0.6" />
+                <rect x="8" y="15" width="8" height="2" rx="1" fill="currentColor" opacity="0.4" />
+              </svg>
+            }
+            label="Roblox"
+            size="sm"
+          />
+        </div>
+        <div className="flex justify-center items-start">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 7V4h16v3M9 20h6M12 4v16" strokeLinecap="round" />
+              </svg>
+            }
+            label="Транзакция"
+            size="sm"
+          />
+        </div>
+        <div className="flex justify-center items-start">
+          <CircuitNode
+            icon={
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            }
+            label="Robux"
+            size="sm"
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-function FlowStep({ number, title, description, icon, delay }: {
-  number: number; title: string; description: string; icon: React.ReactNode; delay: string;
+function CircuitNode({ icon, label, size = "sm", highlighted = false }: {
+  icon: React.ReactNode; label: string; size?: "sm" | "lg"; highlighted?: boolean;
 }) {
-  return (
-    <div className={`flex flex-col items-center gap-3 animate-fade-in-up ${delay}`} style={{ opacity: 0 }}>
-      <div className="relative">
-        <div className="w-16 h-16 rounded-2xl bg-[#00b06a]/10 border border-[#00b06a]/20 flex items-center justify-center text-[#00b06a] transition-all duration-300 hover:scale-110 hover:bg-[#00b06a]/15 hover:border-[#00b06a]/40 hover:shadow-lg hover:shadow-[#00b06a]/10">
-          {icon}
-        </div>
-        <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#00b06a] text-white text-xs font-bold flex items-center justify-center">
-          {number}
-        </div>
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-semibold">{title}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </div>
-    </div>
-  );
-}
+  const sizeClasses = size === "lg" ? "w-20 h-20" : "w-14 h-14";
+  const containerClasses = highlighted
+    ? "border-[#00b06a]/40 bg-[#00b06a]/10 shadow-lg shadow-[#00b06a]/10 animate-glow-pulse"
+    : "border-white/10 bg-white/[0.03] hover:border-[#00b06a]/30 hover:bg-[#00b06a]/5";
 
-function FlowArrow() {
   return (
-    <div className="hidden md:flex items-center px-2">
-      <div className="w-12 h-[2px] bg-gradient-to-r from-[#00b06a]/40 to-[#00b06a]/10 relative">
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0 h-0 border-l-[6px] border-l-[#00b06a]/40 border-y-[4px] border-y-transparent" />
+    <div className="flex flex-col items-center gap-2">
+      <div className={`${sizeClasses} rounded-2xl border ${containerClasses} flex items-center justify-center text-[#00b06a] transition-all duration-300 hover:scale-105`}>
+        {icon}
       </div>
+      <span className="text-[10px] md:text-xs text-muted-foreground font-medium px-2 py-0.5 rounded-md bg-white/[0.03] border border-white/5">
+        {label}
+      </span>
     </div>
   );
 }
