@@ -125,7 +125,7 @@ export default function CodeActivationPage() {
       if (data.gamepass.price !== null && data.gamepass.price === requiredPrice) {
         setGamepassValid(true);
       } else if (data.gamepass.price !== null && data.gamepass.price !== requiredPrice) {
-        setError(`Цена GamePass: ${data.gamepass.price} R$. Нужна: ${requiredPrice} R$. Измените цену и проверьте снова.`);
+        setError(`Цена GamePass: ${data.gamepass.price}. Нужна: ${requiredPrice}. Измените цену и проверьте снова.`);
         setGamepassValid(false);
       } else {
         // Price is null (not for sale?)
@@ -300,7 +300,7 @@ export default function CodeActivationPage() {
                   {/* Code info */}
                   <div className="rounded-xl p-4 bg-[#00b06a]/5 border border-[#00b06a]/15 space-y-2">
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Код:</span><span className="font-mono font-bold">{code}</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Номинал:</span><Badge className="bg-[#00b06a] text-white">{nominal}</Badge></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Номинал:</span><Badge className="bg-[#00b06a] text-white inline-flex items-center gap-1"><RobuxIcon />{nominal}</Badge></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Тип:</span><Badge variant="outline">Roblox</Badge></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Статус:</span><Badge className="bg-[#00b06a]/20 text-[#00b06a] border-[#00b06a]/30"><CheckCircle className="w-3 h-3 mr-1" />Готов к активации</Badge></div>
                   </div>
@@ -345,7 +345,7 @@ export default function CodeActivationPage() {
                     <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                       <li>откройте <a href="https://create.roblox.com/" target="_blank" className="text-[#00b06a] hover:underline">Creator Dashboard</a></li>
                       <li>создайте GamePass</li>
-                      <li>установите цену <strong className="text-foreground">{requiredPrice} R$</strong> для этого кода</li>
+                      <li>установите цену <strong className="text-foreground inline-flex items-center gap-1"><RobuxIcon />{requiredPrice}</strong> для этого кода</li>
                       <li>отключите Regional Pricing</li>
                       <li>если Roblox просит верификацию — пройдите опрос View questionnaire</li>
                     </ul>
@@ -436,7 +436,10 @@ export default function CodeActivationPage() {
                             </span>
                           </div>
                           <div className="px-3 py-2 border-l border-white/10">
-                            <span>⊙ {requiredPrice}</span>
+                            <span className="inline-flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none"><path d="M8 1L14.5 4.5V11.5L8 15L1.5 11.5V4.5L8 1Z" stroke="currentColor" strokeWidth="1.2"/><circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.2"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor" opacity="0.4"/></svg>
+                              {requiredPrice}
+                            </span>
                           </div>
                           <div className="px-3 py-2 border-l border-white/10">
                             <span className="bg-white/10 rounded px-2 py-0.5 text-foreground">Disabled</span>
@@ -449,7 +452,7 @@ export default function CodeActivationPage() {
                         <input type="checkbox" checked={regionalPricingConfirmed} onChange={(e) => setRegionalPricingConfirmed(e.target.checked)}
                           className="mt-0.5 w-5 h-5 rounded accent-[#00b06a]" />
                         <span className="text-sm text-muted-foreground">
-                          Подтверждаю: в GamePass цена <strong className="text-foreground">{requiredPrice} R$</strong>, а Regional Pricing выключен
+                          Подтверждаю: в GamePass цена <strong className="text-foreground inline-flex items-center gap-1"><RobuxIcon />{requiredPrice}</strong>, а Regional Pricing выключен
                         </span>
                       </label>
                     </div>
@@ -562,7 +565,7 @@ export default function CodeActivationPage() {
                   </div>
                   <div className="rounded-xl p-4 bg-white/[0.03] border border-white/8 text-sm text-left space-y-2">
                     <div className="flex justify-between"><span className="text-muted-foreground">Код:</span><span className="font-mono font-bold">{code}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Номинал:</span><span className="text-[#00b06a] font-bold">{nominal} Robux</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Номинал:</span><span className="text-[#00b06a] font-bold inline-flex items-center gap-1"><RobuxIcon />{nominal}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Ник:</span><span>{nickname}</span></div>
                   </div>
                   <p className="text-xs text-muted-foreground">Проверяйте статус на <a href="/status" className="text-[#00b06a] hover:underline">странице статуса</a></p>
@@ -615,5 +618,15 @@ function FeatureCard({ icon, title, description, delay }: { icon: React.ReactNod
       <h3 className="text-sm font-semibold mb-1">{title}</h3>
       <p className="text-xs text-muted-foreground">{description}</p>
     </div>
+  );
+}
+
+function RobuxIcon() {
+  return (
+    <svg className="w-4 h-4 inline-block" viewBox="0 0 16 16" fill="none">
+      <path d="M8 1L14.5 4.5V11.5L8 15L1.5 11.5V4.5L8 1Z" stroke="currentColor" strokeWidth="1.3" fill="none" />
+      <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      <rect x="6.5" y="6.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5" />
+    </svg>
   );
 }
