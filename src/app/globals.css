@@ -234,6 +234,12 @@
 .delay-600 { animation-delay: 0.6s; }
 .delay-700 { animation-delay: 0.7s; }
 
+@keyframes travel {
+  0% { left: 0; }
+  50% { left: calc(100% - 8px); }
+  100% { left: 0; }
+}
+
 /* ===== GLASS MORPHISM ===== */
 .glass {
   background: rgba(18, 18, 26, 0.7);

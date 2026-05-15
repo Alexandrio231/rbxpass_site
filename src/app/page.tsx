@@ -232,19 +232,17 @@ export default function CodeActivationPage() {
           </div>
         </section>
 
-        {/* Process Flow Diagram - Circuit board style */}
+        {/* Process Flow Diagram - Simple 3 steps */}
         <section className="container mx-auto px-4 pb-20">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center mb-10">
             <p className="text-xs font-medium text-[#00b06a] uppercase tracking-wider mb-3 animate-fade-in-up delay-300" style={{ opacity: 0 }}>
-              Как это работает
+              Всего 3 шага
             </p>
             <h2 className="text-2xl md:text-4xl font-bold mb-3 animate-fade-in-up delay-400" style={{ opacity: 0 }}>
-              Твой код. Твои Robux.
-              <br />
-              <span className="text-muted-foreground">Максимально просто.</span>
+              Как получить Robux?
             </h2>
-            <p className="text-sm text-muted-foreground max-w-lg mx-auto mb-4 animate-fade-in-up delay-500" style={{ opacity: 0 }}>
-              RBXPass связывает твой код с аккаунтом Roblox через GamePass — безопасно и прозрачно.
+            <p className="text-sm text-muted-foreground max-w-md mx-auto animate-fade-in-up delay-500" style={{ opacity: 0 }}>
+              Всё просто — введи код, создай GamePass и жди зачисления
             </p>
           </div>
           <ProcessFlow />
