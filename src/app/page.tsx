@@ -406,53 +406,56 @@ export default function CodeActivationPage() {
 
                   {/* Regional Pricing warning */}
                   {gamepassValid && (
-                    <div className="rounded-xl p-4 bg-yellow-500/5 border border-yellow-500/15 space-y-4 animate-fade-in">
-                      <p className="text-sm font-medium text-yellow-400">⚠️ Где проверить Regional Pricing</p>
-                      <p className="text-xs text-muted-foreground">
-                        В таблице Passes смотрите колонку <strong className="text-foreground">Regional Pricing</strong>:{" "}
-                        <Badge variant="outline" className="text-xs bg-white/5">Disabled</Badge> ← так должно быть.
-                      </p>
-                      <p className="text-xs text-yellow-400/70">
-                        Если статус <strong>Enabled</strong> — выключите Regional Pricing и снова нажмите &quot;Проверить GamePass&quot;.
-                      </p>
+                    <div className="rounded-xl p-4 bg-yellow-500/5 border border-yellow-500/15 space-y-3 animate-fade-in">
+                      <p className="text-sm font-medium text-yellow-400">⚠️ Проверьте перед продолжением</p>
 
-                      {/* Visual table example */}
-                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Пример вкладки Creations → Monetization → Passes:</p>
-                      <div className="rounded-lg overflow-hidden border border-white/10 text-xs">
-                        <div className="grid grid-cols-4 bg-white/5 border-b border-white/10 font-medium text-muted-foreground">
-                          <div className="px-3 py-2">Passes</div>
-                          <div className="px-3 py-2 border-l border-white/10 text-[#00b06a]">Pass ID</div>
-                          <div className="px-3 py-2 border-l border-white/10">Current Price</div>
-                          <div className="px-3 py-2 border-l border-white/10">Regional Pricing</div>
+                      <div className="space-y-2 text-xs text-muted-foreground">
+                        <div className="flex items-start gap-2">
+                          <span className="text-yellow-400 mt-0.5">•</span>
+                          <span>Regional Pricing должен быть <Badge variant="outline" className="text-[10px] bg-white/5 py-0">Disabled</Badge>. Если <strong className="text-yellow-400">Enabled</strong> — <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как отключить →</a></span>
                         </div>
-                        <div className="grid grid-cols-4 items-center">
-                          <div className="px-3 py-2 flex items-center gap-2">
-                            <span>📝</span>
-                            <span>{gamepassInfo?.name || "GamePass"}</span>
-                          </div>
-                          <div className="px-3 py-2 border-l border-white/10">
-                            <span className="font-mono text-[#00b06a] border border-[#00b06a]/30 rounded px-1.5 py-0.5">
-                              {extractGamePassId(gamepassInput)}
-                            </span>
-                          </div>
-                          <div className="px-3 py-2 border-l border-white/10">
-                            <span className="inline-flex items-center gap-1">
-                              <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none"><path d="M8 1L14.5 4.5V11.5L8 15L1.5 11.5V4.5L8 1Z" stroke="currentColor" strokeWidth="1.2"/><circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.2"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor" opacity="0.4"/></svg>
-                              {requiredPrice}
-                            </span>
-                          </div>
-                          <div className="px-3 py-2 border-l border-white/10">
-                            <span className="bg-white/10 rounded px-2 py-0.5 text-foreground">Disabled</span>
-                            <span className="text-red-400 ml-1">←</span>
-                          </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-yellow-400 mt-0.5">•</span>
+                          <span>Если GamePass не работает (404) — пройдите верификацию. <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как пройти →</a></span>
                         </div>
                       </div>
 
-                      <label className="flex items-start gap-3 cursor-pointer pt-2">
+                      {/* Compact visual table */}
+                      <details className="group">
+                        <summary className="text-[10px] text-muted-foreground/60 uppercase tracking-wider cursor-pointer hover:text-muted-foreground transition-colors">
+                          Пример вкладки Creations → Monetization → Passes ▾
+                        </summary>
+                        <div className="mt-2 rounded-lg overflow-hidden border border-white/10 text-[11px]">
+                          <div className="grid grid-cols-4 bg-white/5 border-b border-white/10 font-medium text-muted-foreground">
+                            <div className="px-2 py-1.5">Passes</div>
+                            <div className="px-2 py-1.5 border-l border-white/10 text-[#00b06a]">Pass ID</div>
+                            <div className="px-2 py-1.5 border-l border-white/10">Price</div>
+                            <div className="px-2 py-1.5 border-l border-white/10">Regional Pricing</div>
+                          </div>
+                          <div className="grid grid-cols-4 items-center">
+                            <div className="px-2 py-1.5 flex items-center gap-1">
+                              <span className="text-[10px]">📝</span>
+                              <span>{gamepassInfo?.name || "Pass"}</span>
+                            </div>
+                            <div className="px-2 py-1.5 border-l border-white/10">
+                              <span className="font-mono text-[#00b06a] text-[10px] border border-[#00b06a]/30 rounded px-1 py-0.5">{extractGamePassId(gamepassInput)}</span>
+                            </div>
+                            <div className="px-2 py-1.5 border-l border-white/10 inline-flex items-center gap-0.5">
+                              <RobuxIcon /><span>{requiredPrice}</span>
+                            </div>
+                            <div className="px-2 py-1.5 border-l border-white/10">
+                              <span className="bg-white/10 rounded px-1.5 py-0.5">Disabled</span>
+                              <span className="text-red-400 ml-0.5">←</span>
+                            </div>
+                          </div>
+                        </div>
+                      </details>
+
+                      <label className="flex items-start gap-3 cursor-pointer pt-1">
                         <input type="checkbox" checked={regionalPricingConfirmed} onChange={(e) => setRegionalPricingConfirmed(e.target.checked)}
                           className="mt-0.5 w-5 h-5 rounded accent-[#00b06a]" />
                         <span className="text-sm text-muted-foreground">
-                          Подтверждаю: в GamePass цена <strong className="text-foreground inline-flex items-center gap-1"><RobuxIcon />{requiredPrice}</strong>, а Regional Pricing выключен
+                          Подтверждаю: Regional Pricing выключен и верификация пройдена
                         </span>
                       </label>
                     </div>
