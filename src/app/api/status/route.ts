@@ -5,6 +5,25 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const short = (searchParams.get("code") ?? "").toUpperCase();
   const nickname = (searchParams.get("nickname") ?? "").trim();
+  const recent = searchParams.get("recent");
+
+  // Get recent completed orders for public ticker
+  if (recent === "true") {
+    const orders = await prisma.order.findMany({
+      where: { status: "done" },
+      orderBy: { created_at: "desc" },
+      take: 12,
+      include: { game: { select: { name: true } } },
+    });
+    return NextResponse.json({
+      ok: true,
+      orders: orders.map(o => ({
+        nickname: o.nickname.length > 6 ? o.nickname.slice(0, 4) + "..." + o.nickname.slice(-2) : o.nickname,
+        game: o.game?.name || "Roblox",
+        nominal: parseInt(o.code.split("-")[0]?.replace(/\D/g, "") || "0") || 100,
+      })),
+    });
+  }
 
   // Search by nickname
   if (nickname) {

@@ -594,6 +594,9 @@ export default function CodeActivationPage() {
           </div>
         </section>
 
+        {/* Recent Activations Ticker */}
+        <RecentActivations />
+
         {/* Community */}
         <section className="container mx-auto px-4 pb-16">
           <div className="max-w-2xl mx-auto text-center">
@@ -638,5 +641,43 @@ function RobuxIcon() {
       <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.2" fill="none" />
       <rect x="6.5" y="6.5" width="3" height="3" rx="0.5" fill="currentColor" opacity="0.5" />
     </svg>
+  );
+}
+
+function RecentActivations() {
+  const [orders, setOrders] = useState<Array<{ nickname: string; game: string; nominal: number }>>([]);
+
+  useEffect(() => {
+    fetch("/api/status?recent=true")
+      .then(r => r.json())
+      .then(d => { if (d.ok && d.orders) setOrders(d.orders); })
+      .catch(() => {});
+  }, []);
+
+  if (orders.length === 0) return null;
+
+  return (
+    <section className="container mx-auto px-4 pb-16">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-4">
+          <p className="text-sm text-muted-foreground">Последние активации</p>
+        </div>
+        <div className="overflow-hidden rounded-2xl glass-card border-white/5 p-4">
+          <div className="flex gap-4 animate-ticker">
+            {[...orders, ...orders].map((order, i) => (
+              <div key={i} className="flex-shrink-0 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <div className="w-8 h-8 rounded-lg bg-[#00b06a]/10 flex items-center justify-center">
+                  <Gamepad2 className="w-4 h-4 text-[#00b06a]" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium">{order.nickname}</p>
+                  <p className="text-xs text-muted-foreground">{order.game} • <span className="inline-flex items-center gap-0.5"><RobuxIcon />{order.nominal}</span></p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
