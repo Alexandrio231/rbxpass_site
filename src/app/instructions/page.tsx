@@ -121,7 +121,7 @@ export default function InstructionsPage() {
                 badge="Через приложение Roblox"
                 badgeColor="bg-orange-500/10 text-orange-400 border-orange-500/20"
                 title="Создание GamePass в мобильном приложении"
-                url="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
+                url="https://rutube.ru/video/private/4a902225b74162d06b7d044da2fa79aa/?p=AVVvRc654dFjj42QcA-4Jw"
                 delay="delay-300"
               />
               <VideoCard
@@ -129,7 +129,7 @@ export default function InstructionsPage() {
                 badge="Верификация плейса"
                 badgeColor="bg-rose-500/10 text-rose-400 border-rose-500/20"
                 title="Как пройти View questionnaire (важно для покупок через Pass)"
-                url="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
+                url="https://rutube.ru/shorts/48672fa13933fbf472aa243a6f1ff2cf/"
                 delay="delay-400"
               />
             </div>

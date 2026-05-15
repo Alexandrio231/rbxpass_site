@@ -347,7 +347,7 @@ export default function CodeActivationPage() {
                       <li>создайте GamePass — <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как создать →</a></li>
                       <li>установите цену <strong className="text-foreground inline-flex items-center gap-1"><RobuxIcon />{requiredPrice}</strong> для этого кода</li>
                       <li>отключите Regional Pricing — <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как отключить →</a></li>
-                      <li>если Roblox просит верификацию — <a href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/" target="_blank" className="text-[#00b06a] hover:underline">видео как пройти →</a></li>
+                      <li>если Roblox просит верификацию — <a href="https://rutube.ru/shorts/48672fa13933fbf472aa243a6f1ff2cf/" target="_blank" className="text-[#00b06a] hover:underline">видео как пройти →</a></li>
                     </ul>
                   </div>
 
