@@ -107,28 +107,24 @@ export default function SupportPage() {
 
           {/* Telegram Bot Chat Widget */}
           <div className="mt-8 animate-fade-in-up delay-400" style={{ opacity: 0 }}>
-            <Card className="glass-card border-white/10">
-              <CardContent className="p-6 text-center space-y-4">
-                <div className="w-14 h-14 mx-auto rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center">
-                  <MessageCircle className="w-7 h-7 text-primary" />
+            <Card className="glass-card border-white/10 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="p-4 border-b border-white/10 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#2AABEE]/10 flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-[#2AABEE]" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm">Чат поддержки</h3>
+                    <p className="text-xs text-muted-foreground">Напишите нам прямо здесь</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">Бот-помощник</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Наш Telegram-бот поможет быстро решить типовые вопросы
-                  </p>
+                <div className="h-[400px]">
+                  <iframe
+                    src="https://t.me/loothub_support"
+                    className="w-full h-full border-0"
+                    title="Telegram чат поддержки"
+                  />
                 </div>
-                <a
-                  href="https://t.me/loothub_support"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-medium transition-all duration-300 shadow-lg shadow-purple-600/20 hover:shadow-purple-600/40"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                  </svg>
-                  Открыть бота
-                </a>
               </CardContent>
             </Card>
           </div>
