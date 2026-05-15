@@ -103,12 +103,13 @@ export function ProcessFlow() {
         {/* Step 1 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-200" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-[#00b06a]/20 to-[#00b06a]/5 border-2 border-[#00b06a]/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-[#00b06a]/60 hover:shadow-lg hover:shadow-[#00b06a]/20 transition-all duration-300 group">
-            {/* Golden ticket icon */}
+            {/* Key icon */}
             <svg className="w-10 h-10 md:w-12 md:h-12 group-hover:scale-110 transition-transform" viewBox="0 0 48 48" fill="none">
-              <rect x="6" y="14" width="36" height="20" rx="3" fill="#E8A820" transform="rotate(-8 24 24)"/>
-              <line x1="12" y1="20" x2="34" y2="17" stroke="#8B6914" strokeWidth="1.2"/>
-              <line x1="12" y1="24" x2="34" y2="21" stroke="#8B6914" strokeWidth="1.2"/>
-              <path d="M20 30 L22 28 L24 30 L26 28 L28 30" stroke="#8B6914" strokeWidth="1" strokeLinecap="round" fill="none"/>
+              <circle cx="18" cy="18" r="8" fill="none" stroke="#00b06a" strokeWidth="3"/>
+              <circle cx="18" cy="18" r="4" fill="#00b06a" opacity="0.3"/>
+              <path d="M24 24 L40 40" stroke="#00b06a" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M36 36 L40 32" stroke="#00b06a" strokeWidth="3" strokeLinecap="round"/>
+              <path d="M32 32 L36 28" stroke="#00b06a" strokeWidth="3" strokeLinecap="round"/>
             </svg>
           </div>
           <div className="w-7 h-7 rounded-full bg-[#00b06a] text-white text-sm font-bold flex items-center justify-center mb-2 shadow-lg shadow-[#00b06a]/30">
@@ -123,11 +124,12 @@ export function ProcessFlow() {
         {/* Step 2 */}
         <div className="flex flex-col items-center text-center animate-fade-in-up delay-400" style={{ opacity: 0 }}>
           <div className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-2 border-blue-500/30 flex items-center justify-center mb-4 hover:scale-110 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/20 transition-all duration-300 group">
-            {/* GamePass card icon */}
+            {/* Golden ticket icon */}
             <svg className="w-10 h-10 md:w-12 md:h-12 group-hover:scale-110 transition-transform" viewBox="0 0 48 48" fill="none">
-              <rect x="10" y="10" width="28" height="28" rx="6" fill="#3b82f6" opacity="0.9"/>
-              <rect x="14" y="14" width="20" height="20" rx="4" fill="none" stroke="#1e3a5f" strokeWidth="1.5"/>
-              <path d="M20 28 L24 32 L32 22" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <rect x="6" y="14" width="36" height="20" rx="3" fill="#E8A820" transform="rotate(-8 24 24)"/>
+              <line x1="12" y1="20" x2="34" y2="17" stroke="#8B6914" strokeWidth="1.2"/>
+              <line x1="12" y1="24" x2="34" y2="21" stroke="#8B6914" strokeWidth="1.2"/>
+              <path d="M20 30 L22 28 L24 30 L26 28 L28 30" stroke="#8B6914" strokeWidth="1" strokeLinecap="round" fill="none"/>
             </svg>
           </div>
           <div className="w-7 h-7 rounded-full bg-blue-500 text-white text-sm font-bold flex items-center justify-center mb-2 shadow-lg shadow-blue-500/30">
