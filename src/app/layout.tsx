@@ -3,14 +3,22 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "LootHub - Универсальный магазин цифровых кодов",
-  description: "Активация кодов для Roblox, Fortnite, PlayStation Plus, Xbox Game Pass, Steam и других игр",
-  keywords: ["LootHub", "коды активации", "Roblox", "Fortnite", "PS Plus", "Xbox", "Steam", "цифровые товары"],
+  title: "RBXPass — Активация кодов для Roblox и других игр",
+  description: "Активируйте коды для получения Robux, V-Bucks и других игровых валют. Быстро, безопасно, с гарантией.",
+  keywords: ["RBXPass", "Robux", "коды активации", "Roblox", "Fortnite", "PUBG", "игровая валюта", "геймпасс"],
+  openGraph: {
+    title: "RBXPass — Активация игровых кодов",
+    description: "Активируйте коды для получения Robux и других игровых валют. Быстро и безопасно.",
+    url: "https://rbxpass.ru",
+    siteName: "RBXPass",
+    locale: "ru_RU",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

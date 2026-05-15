@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from 'next/image';
+import Image from "next/image";
 import { Home, Search, BookOpen, Shield, PlayCircle, Menu } from "lucide-react";
 import {
   Sheet,
@@ -15,148 +15,83 @@ interface NavigationProps {
 }
 
 export function Navigation({ currentPage }: NavigationProps) {
-  const getPageTitle = () => {
-    switch (currentPage) {
-      case "instructions":
-        return "Инструкция по активации";
-      case "status":
-        return "Статус заказа";
-      default:
-        return "LootHub - Активация кодов";
-    }
-  };
-
   return (
-    <nav className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4">
+    <nav className="sticky top-0 z-50 glass border-b border-white/10">
+      <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center">
+          <Link
+            href="/"
+            className="flex items-center gap-3 hover:opacity-80 transition-all duration-300 group"
+          >
+            <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-purple-500/30 group-hover:ring-purple-500/60 transition-all">
               <Image
-                src="/images/logo.jpg" 
-                alt="LootHub"
-                width={100} 
-                height={40} 
-                className="primary-logo w-10 h-10 rounded-lg"
+                src="/images/logo.jpg"
+                alt="RBXPass"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">LootHub</h1>
-              <p className="text-xs text-gray-500">{getPageTitle()}</p>
+              <h1 className="text-xl font-bold gradient-text">RBXPass</h1>
+              <p className="text-[10px] text-muted-foreground leading-none">
+                Активация кодов
+              </p>
             </div>
           </Link>
+
           {/* Desktop actions */}
-          <div className="hidden md:flex gap-2">
-            {currentPage !== "home" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/" className="flex items-center gap-1">
-                  <Home className="w-3 h-3" />
-                  Главная
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "status" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/status" className="flex items-center gap-1">
-                  <Search className="w-3 h-3" />
-                  Статус
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "instructions" && (
-              <Button asChild variant="outline" size="sm">
-                <Link href="/instructions" className="flex items-center gap-1">
-                  <BookOpen className="w-3 h-3" />
-                  Инструкция
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "home" && (
-              <Button asChild variant="outline" size="sm">
-                <Link
-                  href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
-                  className="flex items-center gap-1"
-                >
-                  <PlayCircle className="w-3 h-3" />
-                  Видеоинструкция
-                </Link>
-              </Button>
-            )}
-            {currentPage !== "home" && (
-              <Button asChild variant="outline" size="sm">
-                <Link
-                  href="https://t.me/loothub_support"
-                  className="flex items-center gap-1"
-                >
-                  <Shield className="w-3 h-3" />
-                  Поддержка
-                </Link>
-              </Button>
-            )}
+          <div className="hidden md:flex gap-1.5">
+            <NavLink href="/" icon={Home} label="Главная" active={currentPage === "home" || currentPage === "activation"} />
+            <NavLink href="/status" icon={Search} label="Статус" active={currentPage === "status"} />
+            <NavLink href="/instructions" icon={BookOpen} label="Инструкция" active={currentPage === "instructions"} />
+            <NavLink
+              href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
+              icon={PlayCircle}
+              label="Видео"
+              external
+            />
+            <NavLink
+              href="https://t.me/loothub_support"
+              icon={Shield}
+              label="Поддержка"
+              external
+            />
           </div>
 
           {/* Mobile menu */}
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="Открыть меню">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Открыть меню"
+                  className="text-foreground hover:bg-white/10"
+                >
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="p-4">
-                <SheetTitle className="text-lg font-semibold mb-4">
-                  Меню навигации
+              <SheetContent side="right" className="bg-background border-border p-6">
+                <SheetTitle className="text-lg font-semibold mb-6 gradient-text">
+                  Навигация
                 </SheetTitle>
                 <div className="flex flex-col gap-2">
-                  {currentPage !== "home" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link href="/" className="flex items-center gap-2">
-                        <Home className="w-4 h-4" />
-                        Главная
-                      </Link>
-                    </Button>
-                  )}
-                  {currentPage !== "status" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link href="/status" className="flex items-center gap-2">
-                        <Search className="w-4 h-4" />
-                        Статус
-                      </Link>
-                    </Button>
-                  )}
-                  {currentPage !== "instructions" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link
-                        href="/instructions"
-                        className="flex items-center gap-2"
-                      >
-                        <BookOpen className="w-4 h-4" />
-                        Инструкция
-                      </Link>
-                    </Button>
-                  )}
-                  {currentPage !== "home" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link
-                        href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
-                        className="flex items-center gap-2"
-                      >
-                        <PlayCircle className="w-4 h-4" />
-                        Видеоинструкция
-                      </Link>
-                    </Button>
-                  )}
-                  {currentPage !== "home" && (
-                    <Button asChild variant="outline" size="sm">
-                      <Link
-                        href="https://t.me/loothub_support"
-                        className="flex items-center gap-2"
-                      >
-                        <Shield className="w-4 h-4" />
-                        Поддержка
-                      </Link>
-                    </Button>
-                  )}
+                  <MobileNavLink href="/" icon={Home} label="Главная" active={currentPage === "home" || currentPage === "activation"} />
+                  <MobileNavLink href="/status" icon={Search} label="Статус заказа" active={currentPage === "status"} />
+                  <MobileNavLink href="/instructions" icon={BookOpen} label="Инструкция" active={currentPage === "instructions"} />
+                  <MobileNavLink
+                    href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/"
+                    icon={PlayCircle}
+                    label="Видеоинструкция"
+                    external
+                  />
+                  <MobileNavLink
+                    href="https://t.me/loothub_support"
+                    icon={Shield}
+                    label="Поддержка"
+                    external
+                  />
                 </div>
               </SheetContent>
             </Sheet>
@@ -164,5 +99,77 @@ export function Navigation({ currentPage }: NavigationProps) {
         </div>
       </div>
     </nav>
+  );
+}
+
+function NavLink({
+  href,
+  icon: Icon,
+  label,
+  active,
+  external,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active?: boolean;
+  external?: boolean;
+}) {
+  const className = `flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+    active
+      ? "bg-primary/20 text-primary"
+      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+  }`;
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        <Icon className="w-3.5 h-3.5" />
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      <Icon className="w-3.5 h-3.5" />
+      {label}
+    </Link>
+  );
+}
+
+function MobileNavLink({
+  href,
+  icon: Icon,
+  label,
+  active,
+  external,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  active?: boolean;
+  external?: boolean;
+}) {
+  const className = `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+    active
+      ? "bg-primary/20 text-primary"
+      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+  }`;
+
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        <Icon className="w-5 h-5" />
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      <Icon className="w-5 h-5" />
+      {label}
+    </Link>
   );
 }
