@@ -344,10 +344,10 @@ export default function CodeActivationPage() {
                     <p className="text-sm font-semibold text-[#00b06a]">Создайте GamePass:</p>
                     <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                       <li>откройте <a href="https://create.roblox.com/" target="_blank" className="text-[#00b06a] hover:underline">Creator Dashboard</a></li>
-                      <li>создайте GamePass</li>
+                      <li>создайте GamePass — <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как создать →</a></li>
                       <li>установите цену <strong className="text-foreground inline-flex items-center gap-1"><RobuxIcon />{requiredPrice}</strong> для этого кода</li>
-                      <li>отключите Regional Pricing</li>
-                      <li>если Roblox просит верификацию — пройдите опрос View questionnaire</li>
+                      <li>отключите Regional Pricing — <a href="/instructions" target="_blank" className="text-[#00b06a] hover:underline">как отключить →</a></li>
+                      <li>если Roblox просит верификацию — <a href="https://rutube.ru/video/a2652268ba8a379f99c77eecb5ac7745/" target="_blank" className="text-[#00b06a] hover:underline">видео как пройти →</a></li>
                     </ul>
                   </div>
 
@@ -431,8 +431,8 @@ export default function CodeActivationPage() {
                         </div>
                         <div className="grid grid-cols-4 items-center">
                           <div className="px-2 py-1.5 flex items-center gap-1">
-                            <span className="text-[10px]">📝</span>
-                            <span>{gamepassInfo?.name || "Pass"}</span>
+                            <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" fill="#E8A820" /><line x1="4" y1="6" x2="12" y2="6" stroke="#8B6914" strokeWidth="0.8"/><line x1="4" y1="8" x2="12" y2="8" stroke="#8B6914" strokeWidth="0.8"/><circle cx="7" cy="11" r="0.8" fill="#8B6914"/><circle cx="9" cy="11" r="0.8" fill="#8B6914"/></svg>
+                            <span className="text-muted-foreground/70 italic">(ваш pass)</span>
                           </div>
                           <div className="px-2 py-1.5 border-l border-white/10">
                             <span className="font-mono text-[#00b06a] text-[10px] border border-[#00b06a]/30 rounded px-1 py-0.5">{extractGamePassId(gamepassInput)}</span>
