@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   try {
     // Try to get GamePass info from Roblox API
     const res = await fetch(
-      `https://economy.roblox.com/v1/game-passes/${encodeURIComponent(gamepassId)}/game-pass-product-info`,
+      `https://apis.roblox.com/game-passes/v1/game-passes/${encodeURIComponent(gamepassId)}/product-info`,
       { next: { revalidate: 0 } }
     );
 
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     return NextResponse.json({
       ok: true,
       gamepass: {
-        id: data.TargetId || data.GamePassId || gamepassId,
+        id: data.TargetId || gamepassId,
         name: data.Name || "Unknown",
         price: data.PriceInRobux ?? null,
         isForSale: data.IsForSale ?? false,
