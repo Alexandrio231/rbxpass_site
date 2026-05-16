@@ -561,21 +561,98 @@ export default function CodeActivationPage() {
             {/* SUCCESS */}
             {success && activationResult && (
               <Card className="glass-card border-[#00b06a]/20 shadow-2xl shadow-[#00b06a]/5 animate-scale-in">
-                <CardContent className="p-8 text-center space-y-6">
-                  <div className="w-20 h-20 mx-auto rounded-full bg-[#00b06a]/10 border border-[#00b06a]/30 flex items-center justify-center animate-glow-pulse">
-                    <CheckCircle className="w-10 h-10 text-[#00b06a]" />
+                <CardContent className="p-6 md:p-8 space-y-5">
+                  {/* Header */}
+                  <div className="text-center">
+                    <div className="w-16 h-16 mx-auto rounded-full bg-[#00b06a]/10 border border-[#00b06a]/30 flex items-center justify-center animate-glow-pulse mb-4">
+                      <CheckCircle className="w-8 h-8 text-[#00b06a]" />
+                    </div>
+                    <h2 className="text-xl font-bold text-[#00b06a]">GamePass получен!</h2>
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-[#00b06a] mb-2">Успешно!</h2>
-                    <p className="text-muted-foreground">{success}</p>
-                  </div>
-                  <div className="rounded-xl p-4 bg-white/[0.03] border border-white/8 text-sm text-left space-y-2">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Код:</span><span className="font-mono font-bold">{code}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Номинал:</span><span className="text-[#00b06a] font-bold inline-flex items-center gap-1"><RobuxIcon />{nominal}</span></div>
+
+                  {/* Order Info */}
+                  <div className="rounded-xl p-4 bg-white/[0.03] border border-white/8 text-sm space-y-2">
+                    <div className="flex justify-between"><span className="text-muted-foreground">Код заказа:</span><span className="font-mono font-bold text-[#00b06a]">{activationResult?.order?.short_code}</span></div>
+                    <div className="flex justify-between"><span className="text-muted-foreground">Номинал:</span><span className="text-[#00b06a] font-bold inline-flex items-center gap-1"><RobuxIcon />{nominal} Robux</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Ник:</span><span>{nickname}</span></div>
                   </div>
-                  <p className="text-xs text-muted-foreground">Проверяйте статус на <a href="/status" className="text-[#00b06a] hover:underline">странице статуса</a></p>
-                  <Button onClick={resetForm} className="w-full h-11 btn-roblox rounded-xl">Активировать ещё</Button>
+
+                  {/* Timing Info */}
+                  <div className="rounded-xl p-4 bg-blue-500/5 border border-blue-500/15 text-sm space-y-2">
+                    <p className="text-foreground font-medium flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-400" />
+                      Сроки зачисления
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      Robux начисляются в течение <span className="text-foreground font-medium">5 дней (120 часов)</span> после
+                      выкупа пасса поставщиком. Это правило системы Roblox — ускорить процесс невозможно.
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      Обычно выкуп происходит ночью (из-за другого часового пояса).
+                    </p>
+                  </div>
+
+                  {/* If not received */}
+                  <div className="rounded-xl p-4 bg-yellow-500/5 border border-yellow-500/15 text-sm space-y-2">
+                    <p className="text-foreground font-medium flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                      Если прошло более 6 дней и Robux не поступили
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      Напишите в поддержку: <span className="text-foreground">«Помощь с заказом, робуксы не пришли»</span>
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      Приложите 📎 скриншот раздела <span className="text-foreground">Transactions</span> в Roblox.
+                      Без скриншота мы не сможем передать запрос поставщику.
+                    </p>
+                  </div>
+
+                  {/* Thank you + CTA */}
+                  <div className="rounded-xl p-4 bg-[#00b06a]/5 border border-[#00b06a]/15 text-sm space-y-3">
+                    <p className="text-foreground font-medium">💜 Спасибо, что выбрали LootHub!</p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      Мы стараемся держать одни из самых низких цен, поэтому будем рады видеть вас снова.
+                    </p>
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      ⭐ Если будет минутка — <span className="text-foreground">оставьте отзыв на Wildberries</span> — это помогает нам развиваться и держать цены ниже.
+                    </p>
+                  </div>
+
+                  {/* Links */}
+                  <div className="flex flex-col gap-2">
+                    <a
+                      href="https://t.me/rbxpass_loothub"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:border-[#00b06a]/30 transition-all text-sm"
+                    >
+                      <span className="text-lg">📢</span>
+                      <div>
+                        <span className="text-foreground text-xs font-medium">Telegram-канал</span>
+                        <span className="text-muted-foreground text-xs ml-1">— новости, розыгрыши, задержки Roblox</span>
+                      </div>
+                    </a>
+                    <a
+                      href="https://t.me/LootHubStoreBot"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/8 hover:border-[#00b06a]/30 transition-all text-sm"
+                    >
+                      <span className="text-lg">🤖</span>
+                      <div>
+                        <span className="text-foreground text-xs font-medium">Telegram-бот LootHub</span>
+                        <span className="text-muted-foreground text-xs ml-1">— покупка Robux без карточек, быстрее</span>
+                      </div>
+                    </a>
+                  </div>
+
+                  {/* Status + Reset */}
+                  <div className="space-y-3 pt-2">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Проверяйте статус заказа на <a href="/status" className="text-[#00b06a] hover:underline">странице статуса</a>
+                    </p>
+                    <Button onClick={resetForm} className="w-full h-11 btn-roblox rounded-xl">Активировать ещё</Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
